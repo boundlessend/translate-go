@@ -45,13 +45,25 @@ sudo xattr -rd com.apple.quarantine "/Applications/translate&go.app"
 
 5. Open the app again.
 6. Allow Accessibility access when prompted.
-7. Install Ollama and download a translation model if you have not done that yet:
+7. Install Homebrew if it is not installed:
 
 ```bash
-ollama pull translategemma:12b
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-8. Open Settings, choose the model, target language, interface language, and hotkey.
+8. Install Ollama if it is not installed:
+
+```bash
+brew install ollama
+```
+
+9. Download a translation model if you have not done that yet:
+
+```bash
+ollama pull translategemma:4b
+```
+
+10. Open Settings, choose the model, target language, interface language, and hotkey.
 
 For a custom install path, replace `/Applications/translate&go.app` in the `xattr` command with the real `.app` path.
 
