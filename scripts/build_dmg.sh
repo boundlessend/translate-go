@@ -193,7 +193,9 @@ tell application "Finder"
   set position of item "Applications" of targetFolder to {812, 198}
   update targetFolder without registering applications
   delay 2
-  close targetWindow
+  try
+    close targetWindow
+  end try
 end tell
 APPLESCRIPT
 }
