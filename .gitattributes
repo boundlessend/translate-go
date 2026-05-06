@@ -1,0 +1,9 @@
+*.swift text eol=lf
+*.sh text eol=lf
+*.command text eol=lf
+*.plist text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.png binary
+*.icns binary
+

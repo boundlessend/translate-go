@@ -1,0 +1,37 @@
+# macOS
+.DS_Store
+._*
+.AppleDouble
+.LSOverride
+
+# Xcode / SwiftPM
+.build/
+.swiftpm/
+DerivedData/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcworkspace/xcuserdata/
+xcuserdata/
+
+# Local editor settings
+.vscode/
+.idea/
+
+# Local MCP / CodeGraphContext config
+mcp.json
+.codegraphcontext/
+
+# Build products and packaged apps
+*.app
+*.dmg
+*.pkg
+*.ipa
+*.xcarchive
+*.iconset/
+
+# Logs and diagnostics
+*.log
+*.crash
+
+# Optional local packaging extras
+Auto Fix.app/
+Инструкция.pdf
