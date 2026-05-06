@@ -9,9 +9,11 @@ struct SettingsView: View {
     @State private var isAlertVisible = false
 
     var body: some View {
+        let language = viewModel.interfaceLanguage
+
         Form {
             Section {
-                Picker("Модель", selection: $viewModel.model) {
+                Picker(AppText.modelLabel(language), selection: $viewModel.model) {
                     ForEach(viewModel.availableModels, id: \.self) { model in
                         Text(model).tag(model)
                     }
@@ -21,23 +23,29 @@ struct SettingsView: View {
                 }
 
                 HStack {
-                    Button("Обновить модели") {
+                    Button(AppText.refreshModelsButton(language)) {
                         refreshModels()
                     }
                     .disabled(isRefreshingModels)
 
-                    Button("Скачать модель") {
+                    Button(AppText.downloadModelButton(language)) {
                         openModelSearch()
                     }
                 }
 
-                TextField("Target language", text: $viewModel.targetLanguageText)
+                TextField(AppText.targetLanguagePlaceholder(language), text: $viewModel.targetLanguageText)
                     .textFieldStyle(.roundedBorder)
+
+                Picker(AppText.interfaceLanguageLabel(language), selection: $viewModel.interfaceLanguage) {
+                    ForEach(AppLanguage.allCases) { language in
+                        Text(language.title).tag(language)
+                    }
+                }
             }
 
             Section {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Хоткей")
+                    Text(AppText.hotkeyLabel(language))
                         .font(.headline)
 
                     HStack {
@@ -45,11 +53,11 @@ struct SettingsView: View {
                             .font(.system(.title3, design: .monospaced))
                             .frame(width: 90, alignment: .leading)
 
-                        Button(isRecordingHotkey ? "Нажмите сочетание" : "Изменить") {
+                        Button(isRecordingHotkey ? AppText.pressShortcutButton(language) : AppText.changeButton(language)) {
                             isRecordingHotkey = true
                         }
 
-                        Button("Сброс") {
+                        Button(AppText.resetButton(language)) {
                             resetHotkey()
                         }
                     }
@@ -63,15 +71,15 @@ struct SettingsView: View {
                             .background(Color(nsColor: .selectedControlColor).opacity(0.12))
                             .clipShape(RoundedRectangle(cornerRadius: 6))
 
-                            Button("Отмена") {
+                            Button(AppText.cancelButton(language)) {
                                 isRecordingHotkey = false
                             }
                         }
                     }
                 }
 
-                Toggle("Показывать в Dock", isOn: $viewModel.isDockVisible)
-                Toggle("Показывать в Menu Bar", isOn: $viewModel.isMenuBarVisible)
+                Toggle(AppText.showDockToggle(language), isOn: $viewModel.isDockVisible)
+                Toggle(AppText.showMenuBarToggle(language), isOn: $viewModel.isMenuBarVisible)
             }
 
             Section {
@@ -98,7 +106,7 @@ struct SettingsView: View {
             do {
                 try await viewModel.refreshAvailableModels()
             } catch {
-                alertTitle = "ошибка"
+                alertTitle = AppText.errorTitle(viewModel.interfaceLanguage)
                 alertMessage = error.localizedDescription
                 isAlertVisible = true
             }
@@ -118,7 +126,7 @@ struct SettingsView: View {
             try viewModel.updateHotkey(configuration)
             isRecordingHotkey = false
         } catch {
-            alertTitle = "ошибка хоткея"
+            alertTitle = AppText.hotkeyErrorTitle(viewModel.interfaceLanguage)
             alertMessage = error.localizedDescription
             isAlertVisible = true
         }

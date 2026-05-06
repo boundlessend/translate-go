@@ -3,7 +3,12 @@ import SwiftUI
 
 @MainActor
 final class QAWindowController {
+    private let viewModel: SettingsViewModel
     private var window: NSWindow?
+
+    init(viewModel: SettingsViewModel) {
+        self.viewModel = viewModel
+    }
 
     func showWindow() {
         let window = existingOrNewWindow()
@@ -18,7 +23,7 @@ final class QAWindowController {
             return window
         }
 
-        let rootView = QAView()
+        let rootView = QAView(viewModel: viewModel)
         let hostingController = NSHostingController(rootView: rootView)
         let window = NSWindow(contentViewController: hostingController)
 

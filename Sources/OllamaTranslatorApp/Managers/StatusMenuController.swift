@@ -4,15 +4,19 @@ import AppKit
 final class StatusMenuController {
     private let statusItem: NSStatusItem
     private let menu: NSMenu
+    private let settingsItem: NSMenuItem
+    private let quitItem: NSMenuItem
 
-    init(openSettings: @escaping () -> Void, openQA: @escaping () -> Void, quit: @escaping () -> Void) {
+    init(openSettings: @escaping () -> Void, openQA: @escaping () -> Void, quit: @escaping () -> Void, language: AppLanguage) {
         self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         self.menu = NSMenu()
 
-        let settingsItem = NSMenuItem(title: "Settings", action: #selector(MenuActionTarget.openSettings), keyEquivalent: ",")
+        let settingsItem = NSMenuItem(title: "", action: #selector(MenuActionTarget.openSettings), keyEquivalent: ",")
         let qaItem = NSMenuItem(title: "Q&A", action: #selector(MenuActionTarget.openQA), keyEquivalent: "")
-        let quitItem = NSMenuItem(title: "Quit", action: #selector(MenuActionTarget.quit), keyEquivalent: "q")
+        let quitItem = NSMenuItem(title: "", action: #selector(MenuActionTarget.quit), keyEquivalent: "q")
         let target = MenuActionTarget(openSettings: openSettings, openQA: openQA, quit: quit)
+        self.settingsItem = settingsItem
+        self.quitItem = quitItem
 
         settingsItem.target = target
         qaItem.target = target
@@ -24,7 +28,8 @@ final class StatusMenuController {
         menu.addItem(.separator())
         menu.addItem(quitItem)
 
-        configureStatusButton()
+        configureStatusButton(language: language)
+        updateLanguage(language)
         statusItem.menu = menu
         statusItem.isVisible = false
 
@@ -35,12 +40,18 @@ final class StatusMenuController {
         statusItem.isVisible = isVisible
     }
 
-    private func configureStatusButton() {
+    func updateLanguage(_ language: AppLanguage) {
+        settingsItem.title = AppText.settingsTitle(language)
+        quitItem.title = AppText.quitTitle(language)
+        statusItem.button?.image?.accessibilityDescription = AppText.statusItemDescription(language)
+    }
+
+    private func configureStatusButton(language: AppLanguage) {
         guard let button = statusItem.button else {
             return
         }
 
-        let image = NSImage(systemSymbolName: "character.bubble", accessibilityDescription: "Перевод")
+        let image = NSImage(systemSymbolName: "character.bubble", accessibilityDescription: AppText.statusItemDescription(language))
         image?.isTemplate = true
 
         button.title = ""

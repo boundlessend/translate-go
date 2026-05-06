@@ -25,19 +25,13 @@ struct PermissionManager {
 
     private func showAccessibilityInstructions() {
         DispatchQueue.main.async {
+            let language = AppText.currentLanguage()
             let alert = NSAlert()
-            alert.messageText = "Нужно разрешение Accessibility"
-            alert.informativeText = """
-            Откройте System Settings → Privacy & Security → Accessibility и включите translate&go.
-
-            Если приложение уже есть в списке, удалите старую запись, добавьте заново файл:
-            /Applications/translate&go.app
-
-            После этого перезапустите приложение через run_app.command.
-            """
+            alert.messageText = AppText.accessibilityPermissionTitle(language)
+            alert.informativeText = AppText.accessibilityPermissionMessage(language)
             alert.alertStyle = .warning
-            alert.addButton(withTitle: "Открыть настройки")
-            alert.addButton(withTitle: "Позже")
+            alert.addButton(withTitle: AppText.openSettingsButton(language))
+            alert.addButton(withTitle: AppText.laterButton(language))
 
             let response = alert.runModal()
             guard response == .alertFirstButtonReturn else {

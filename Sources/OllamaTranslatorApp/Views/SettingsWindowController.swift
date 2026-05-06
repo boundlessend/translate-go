@@ -12,6 +12,7 @@ final class SettingsWindowController {
 
     func showWindow() {
         let window = existingOrNewWindow()
+        window.title = windowTitle()
         window.deminiaturize(nil)
         window.makeKeyAndOrderFront(nil)
         window.orderFrontRegardless()
@@ -27,12 +28,16 @@ final class SettingsWindowController {
         let hostingController = NSHostingController(rootView: rootView)
         let window = NSWindow(contentViewController: hostingController)
 
-        window.title = "translate&go Settings"
+        window.title = windowTitle()
         window.styleMask = [.titled, .closable, .miniaturizable]
         window.isReleasedWhenClosed = false
         window.center()
 
         self.window = window
         return window
+    }
+
+    private func windowTitle() -> String {
+        "translate&go \(AppText.settingsTitle(viewModel.interfaceLanguage))"
     }
 }

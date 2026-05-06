@@ -17,7 +17,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         SettingsWindowController(viewModel: settingsViewModel)
     }()
     private lazy var qaWindowController: QAWindowController = {
-        QAWindowController()
+        QAWindowController(viewModel: settingsViewModel)
     }()
     private var hotkeyManager: HotkeyManager?
     private var statusMenuController: StatusMenuController?
@@ -66,7 +66,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let menuController = StatusMenuController(
             openSettings: { [weak self] in self?.openSettingsWindow() },
             openQA: { [weak self] in self?.openQAWindow() },
-            quit: { NSApp.terminate(nil) }
+            quit: { NSApp.terminate(nil) },
+            language: settingsViewModel.interfaceLanguage
         )
         self.statusMenuController = menuController
 
@@ -129,6 +130,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
             .store(in: &cancellables)
+
+        settingsViewModel.$interfaceLanguage
+            .dropFirst()
+            .sink { [weak self] language in
+                Task { @MainActor in
+                    self?.configureApplicationMenu()
+                    self?.statusMenuController?.updateLanguage(language)
+                }
+            }
+            .store(in: &cancellables)
     }
 
     private func applyInterfaceVisibility(isDockVisible: Bool, isMenuBarVisible: Bool) {
@@ -162,11 +173,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func configureApplicationMenu() {
+        let language = settingsViewModel.interfaceLanguage
         let mainMenu = NSMenu()
         let appMenuItem = NSMenuItem()
         let appMenu = NSMenu()
         let settingsItem = NSMenuItem(
-            title: "Settings...",
+            title: AppText.settingsMenuTitle(language),
             action: #selector(openSettingsFromMenu),
             keyEquivalent: ","
         )
@@ -179,7 +191,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         appMenu.addItem(.separator())
         appMenu.addItem(
             NSMenuItem(
-                title: "Quit translate&go",
+                title: AppText.quitTitle(language),
                 action: #selector(NSApplication.terminate(_:)),
                 keyEquivalent: "q"
             )
@@ -202,9 +214,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         UserDefaults.standard.set(true, forKey: key)
 
+        let language = settingsViewModel.interfaceLanguage
         let alert = NSAlert()
         alert.messageText = "translate&go"
-        alert.informativeText = "привет! спасибо за выбор моей проги, надеюсь она будет полезна! по всем вопросам пиши @boundlessend"
+        alert.informativeText = AppText.welcomeMessage(language)
         alert.alertStyle = .informational
         alert.addButton(withTitle: "OK")
         alert.runModal()
@@ -263,7 +276,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                     "textLength": String(selectedText.count)
                 ]
             )
-            notificationPresenter.show(title: "Перевод начат", message: "Результат появится в буфере обмена после готовности.")
+            let language = settingsViewModel.interfaceLanguage
+            notificationPresenter.show(
+                title: AppText.translationStartedTitle(language),
+                message: AppText.translationStartedMessage(language)
+            )
             diagnosticLogger.log(
                 event: "translation_started",
                 fields: [
@@ -290,7 +307,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 event: "pasteboard_write_finished",
                 fields: ["generation": String(generation)]
             )
-            notificationPresenter.show(title: "Перевод готов", message: "Текст записан в буфер обмена.")
+            notificationPresenter.show(
+                title: AppText.translationReadyTitle(language),
+                message: AppText.translationReadyMessage(language)
+            )
         } catch is CancellationError {
             diagnosticLogger.log(
                 event: "translation_cancelled",
@@ -392,11 +412,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func showTranslationError(_ error: Error) {
-        let message = "\(error.localizedDescription)\n\nЛог: \(diagnosticLogger.logURLPath())"
-        notificationPresenter.show(title: "Ошибка перевода", message: message)
+        let language = settingsViewModel.interfaceLanguage
+        let title = AppText.translationErrorTitle(language)
+        let message = "\(error.localizedDescription)\n\n\(AppText.logLabel(language)): \(diagnosticLogger.logURLPath())"
+        notificationPresenter.show(title: title, message: message)
 
         let alert = NSAlert()
-        alert.messageText = "Ошибка перевода"
+        alert.messageText = title
         alert.informativeText = message
         alert.alertStyle = .warning
         alert.addButton(withTitle: "OK")

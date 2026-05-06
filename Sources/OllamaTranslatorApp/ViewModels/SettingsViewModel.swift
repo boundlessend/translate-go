@@ -16,6 +16,12 @@ final class SettingsViewModel: ObservableObject {
         }
     }
 
+    @Published var interfaceLanguage: AppLanguage {
+        didSet {
+            userDefaults.set(interfaceLanguage.rawValue, forKey: AppLanguageDefaultsKey.interfaceLanguage)
+        }
+    }
+
     @Published var hotkeyConfiguration: HotkeyConfiguration {
         didSet {
             userDefaults.set(hotkeyConfiguration.encode(), forKey: UserDefaultsKey.hotkeyConfiguration)
@@ -52,6 +58,7 @@ final class SettingsViewModel: ObservableObject {
 
         let storedTargetLanguageText = userDefaults.string(forKey: UserDefaultsKey.targetLanguageText)
         self.targetLanguageText = storedTargetLanguageText?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "Русский"
+        self.interfaceLanguage = AppLanguage.current(userDefaults: userDefaults)
 
         let storedHotkeyData = userDefaults.data(forKey: UserDefaultsKey.hotkeyConfiguration)
         self.hotkeyConfiguration = storedHotkeyData.flatMap(HotkeyConfiguration.decode(data:))
