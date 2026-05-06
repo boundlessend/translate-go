@@ -17,6 +17,7 @@ The app works from the Dock or menu bar, listens for a global hotkey, copies the
 - Global hotkey support through `HotKey`.
 - Ollama `/api/generate` integration.
 - Configurable model, target language, hotkey, Dock visibility, and menu bar visibility.
+- English interface by default, with Russian available in Settings.
 - Settings window and Q&A window.
 - Local logging to `~/Library/Logs/translate-go/translator.log`.
 
@@ -31,43 +32,28 @@ The app works from the Dock or menu bar, listens for a global hotkey, copies the
 ollama pull translategemma:12b
 ```
 
-## Build
+## Install
 
-Build the SwiftPM executable:
-
-```bash
-swift build
-```
-
-Build a signed `.app` bundle:
+1. Open `translate-go.dmg`.
+2. Drag `translate&go.app` to `Applications`.
+3. Try to open the app from `Applications`.
+4. If macOS blocks the app because it is unsigned, remove the quarantine attribute:
 
 ```bash
-./scripts/build_app.sh
+sudo xattr -rd com.apple.quarantine "/Applications/translate&go.app"
 ```
 
-The app bundle is written to:
-
-```text
-.build/translate&go.app
-```
-
-Build a DMG:
+5. Open the app again.
+6. Allow Accessibility access when prompted.
+7. Install Ollama and download a translation model if you have not done that yet:
 
 ```bash
-./scripts/build_dmg.sh
+ollama pull translategemma:12b
 ```
 
-The DMG is written to:
+8. Open Settings, choose the model, target language, interface language, and hotkey.
 
-```text
-.build/translate-go.dmg
-```
-
-Install and run the app locally:
-
-```bash
-./run_app.command
-```
+For a custom install path, replace `/Applications/translate&go.app` in the `xattr` command with the real `.app` path.
 
 ## Permissions
 
@@ -114,17 +100,44 @@ You can choose any installed Ollama model in Settings.
 
 If the hotkey does nothing, check Accessibility permission and make sure the active app has selected text.
 
-## Distribution Notes
 
-The local build script signs the app ad-hoc:
+## Build
+
+Build the SwiftPM executable:
 
 ```bash
-codesign --force --deep --sign -
+swift build
 ```
 
-For public distribution without Gatekeeper warnings, use an Apple Developer ID certificate and notarize the app through Apple.
+Build a signed `.app` bundle:
 
-CI builds are ad-hoc signed and are intended for testing, not fully notarized public distribution.
+```bash
+./scripts/build_app.sh
+```
+
+The app bundle is written to:
+
+```text
+.build/translate&go.app
+```
+
+Build a DMG:
+
+```bash
+./scripts/build_dmg.sh
+```
+
+The DMG is written to:
+
+```text
+.build/translate-go.dmg
+```
+
+Install and run the app locally:
+
+```bash
+./run_app.command
+```
 
 ## License
 

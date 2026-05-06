@@ -19,7 +19,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
 
     static func current(userDefaults: UserDefaults) -> AppLanguage {
         let storedValue = userDefaults.string(forKey: AppLanguageDefaultsKey.interfaceLanguage)
-        return storedValue.flatMap(AppLanguage.init(rawValue:)) ?? .russian
+        return storedValue.flatMap(AppLanguage.init(rawValue:)) ?? .english
     }
 }
 

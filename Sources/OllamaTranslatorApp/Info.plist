@@ -21,8 +21,8 @@
     <key>LSMinimumSystemVersion</key>
     <string>13.0</string>
     <key>NSAppleEventsUsageDescription</key>
-    <string>Приложению нужен доступ для отправки системного сочетания Command-C активному приложению.</string>
+    <string>translate&amp;go needs permission to send Command-C to the active app.</string>
     <key>NSAccessibilityUsageDescription</key>
-    <string>Приложению нужен доступ к Accessibility для имитации Command-C и чтения выделенного текста через системный буфер обмена.</string>
+    <string>translate&amp;go needs Accessibility access to copy selected text and write the translation to the pasteboard.</string>
 </dict>
 </plist>
