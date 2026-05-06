@@ -29,7 +29,7 @@ The app works from the Dock or menu bar, listens for a global hotkey, copies the
 - A downloaded Ollama model, for example:
 
 ```bash
-ollama pull translategemma:12b
+ollama pull translategemma:4b
 ```
 
 ## Install
@@ -42,6 +42,8 @@ ollama pull translategemma:12b
 ```bash
 sudo xattr -rd com.apple.quarantine "/Applications/translate&go.app"
 ```
+
+For a custom install path, replace `/Applications/translate&go.app` in the `xattr` command with the real `.app` path.
 
 5. Open the app again.
 6. Allow Accessibility access when prompted.
@@ -63,13 +65,11 @@ brew install ollama
 ollama pull translategemma:4b
 ```
 
-10. Open Settings, choose the model, target language, interface language, and hotkey.
-
-For a custom install path, replace `/Applications/translate&go.app` in the `xattr` command with the real `.app` path.
+10. Open translate&go settings in meny bar, choose the model, target language, interface language, and hotkey.
 
 ## Permissions
 
-The app needs Accessibility permission to send `Command-C` and read the selected text flow.
+The app needs Accessibility permission to send the hotkey and read the selected text flow.
 
 Open:
 
@@ -94,12 +94,6 @@ The app expects Ollama at:
 ```
 
 On launch, it checks the local Ollama server and starts `ollama serve` if needed. On quit, it attempts to stop the configured model and local Ollama processes.
-
-The default model name is:
-
-```text
-translategemma:12b
-```
 
 You can choose any installed Ollama model in Settings.
 
@@ -150,7 +144,3 @@ Install and run the app locally:
 ```bash
 ./run_app.command
 ```
-
-## License
-
-MIT License. See `LICENSE`.
