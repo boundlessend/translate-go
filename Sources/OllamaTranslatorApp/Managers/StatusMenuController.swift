@@ -21,7 +21,7 @@ final class StatusMenuController {
         settingsItem.target = target
         qaItem.target = target
         quitItem.target = target
-        settingsItem.image = NSImage(systemSymbolName: "gearshape", accessibilityDescription: "Settings")
+        settingsItem.image = NSImage(systemSymbolName: "gearshape", accessibilityDescription: AppText.settingsTitle(language))
         qaItem.image = NSImage(systemSymbolName: "questionmark.circle", accessibilityDescription: "Q&A")
         menu.addItem(settingsItem)
         menu.addItem(qaItem)
@@ -43,6 +43,7 @@ final class StatusMenuController {
     func updateLanguage(_ language: AppLanguage) {
         settingsItem.title = AppText.settingsTitle(language)
         quitItem.title = AppText.quitTitle(language)
+        settingsItem.image?.accessibilityDescription = AppText.settingsTitle(language)
         statusItem.button?.image?.accessibilityDescription = AppText.statusItemDescription(language)
     }
 

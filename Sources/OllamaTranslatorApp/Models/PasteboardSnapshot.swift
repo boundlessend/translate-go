@@ -1,5 +1,6 @@
 import AppKit
 
+/// хранит временный снимок буфера обмена для восстановления после ошибки
 struct PasteboardSnapshot {
     let items: [PasteboardSnapshotItem]
 

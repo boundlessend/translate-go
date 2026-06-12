@@ -83,9 +83,9 @@ enum AppError: LocalizedError {
         case .copySelectionTimedOut:
             return "Could not read selected text with Command-C. Check the text selection and Accessibility permission."
         case .pasteboardWriteFailed:
-            return "Could not write the translation to the system pasteboard."
+            return "Could not write the translation to the clipboard."
         case .pasteboardRestoreFailed:
-            return "Could not restore the previous system pasteboard after an error."
+            return "Could not restore the previous clipboard after an error."
         case let .ollamaExecutableMissing(path):
             return "Ollama was not found at \(path). Install Ollama or add the binary to this path."
         case .ollamaStartupTimedOut:

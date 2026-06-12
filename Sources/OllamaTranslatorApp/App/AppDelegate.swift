@@ -25,7 +25,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var currentTranslationTask: Task<Void, Never>?
     private var translationGeneration: Int
     private weak var lastFocusedApplication: NSRunningApplication?
-    private var isTranslating: Bool
 
     override init() {
         let diagnosticLogger = DiagnosticLogger()
@@ -47,7 +46,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         self.currentTranslationTask = nil
         self.translationGeneration = 0
         self.lastFocusedApplication = nil
-        self.isTranslating = false
         super.init()
     }
 
@@ -254,11 +252,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @MainActor
     private func translateSelection(generation: Int) async {
-        isTranslating = true
-        defer {
-            isTranslating = false
-        }
-
         let pasteboardSnapshot = PasteboardSnapshot(pasteboard: pasteboard)
 
         do {

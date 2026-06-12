@@ -1,6 +1,7 @@
 import AppKit
 import Foundation
 
+/// управляет локальным сервером ollama, запущенным этим приложением
 final class OllamaRuntimeManager {
     private let tagsEndpoint: URL
     private let generateEndpoint: URL
@@ -12,6 +13,8 @@ final class OllamaRuntimeManager {
 
     init(tagsEndpoint: URL, generateEndpoint: URL, model: String, diagnosticLogger: DiagnosticLogger) {
         let configuration = URLSessionConfiguration.default
+        configuration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        configuration.urlCache = nil
         configuration.timeoutIntervalForRequest = 30
         configuration.timeoutIntervalForResource = 60
 
@@ -25,7 +28,6 @@ final class OllamaRuntimeManager {
 
     func startIfNeeded() async throws {
         diagnosticLogger.log(event: "ollama_start_check_started", fields: ["model": model])
-        try await terminateOllamaApplicationIfRunning()
 
         if await isOllamaReady() == false {
             diagnosticLogger.log(event: "ollama_not_ready", fields: [:])
@@ -42,11 +44,11 @@ final class OllamaRuntimeManager {
     func stopOnApplicationExit() {
         stopModel()
         stopOwnedServeProcess()
-        stopAllOllamaProcesses()
     }   
 
     private func isOllamaReady() async -> Bool {
         var request = URLRequest(url: tagsEndpoint)
+        request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         request.timeoutInterval = 2
 
         do {
@@ -78,46 +80,6 @@ final class OllamaRuntimeManager {
         diagnosticLogger.log(event: "ollama_serve_started", fields: ["path": executableURL.path])
     }
 
-    private func terminateOllamaApplicationIfRunning() async throws {
-        let applications = NSWorkspace.shared.runningApplications.filter { application in
-            application.bundleURL?.path == "/Applications/Ollama.app"
-        }
-
-        for application in applications {
-            let isTerminating = application.terminate()
-            diagnosticLogger.log(
-                event: "ollama_gui_terminate_requested",
-                fields: [
-                    "pid": String(application.processIdentifier),
-                    "accepted": String(isTerminating)
-                ]
-            )
-        }
-
-        if applications.isEmpty == false {
-            try await Task.sleep(nanoseconds: 1_000_000_000)
-        }
-
-        let remainingApplications = NSWorkspace.shared.runningApplications.filter { application in
-            application.bundleURL?.path == "/Applications/Ollama.app"
-        }
-
-        for application in remainingApplications {
-            let isTerminating = application.forceTerminate()
-            diagnosticLogger.log(
-                event: "ollama_gui_force_terminate_requested",
-                fields: [
-                    "pid": String(application.processIdentifier),
-                    "accepted": String(isTerminating)
-                ]
-            )
-        }
-
-        if remainingApplications.isEmpty == false {
-            try await Task.sleep(nanoseconds: 1_000_000_000)
-        }
-    }
-
     private func waitForOllama() async throws -> Bool {
         let attempts: Int = 100
         let delayNanoseconds: UInt64 = 100_000_000
@@ -142,6 +104,7 @@ final class OllamaRuntimeManager {
         )
 
         var request = URLRequest(url: generateEndpoint)
+        request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         request.timeoutInterval = 600
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -205,38 +168,4 @@ final class OllamaRuntimeManager {
         diagnosticLogger.log(event: "ollama_serve_stop_finished", fields: [:])
     }
 
-    private func stopAllOllamaProcesses() {
-        runProcess(
-            executablePath: "/usr/bin/pkill",
-            arguments: ["-x", "ollama"],
-            event: "ollama_process_kill_finished"
-        )
-        runProcess(
-            executablePath: "/usr/bin/pkill",
-            arguments: ["-f", "ollama runner"],
-            event: "ollama_runner_kill_finished"
-        )
-    }
-
-    private func runProcess(executablePath: String, arguments: [String], event: String) {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: executablePath)
-        process.arguments = arguments
-        process.standardOutput = Pipe()
-        process.standardError = Pipe()
-
-        do {
-            try process.run()
-            process.waitUntilExit()
-            diagnosticLogger.log(
-                event: event,
-                fields: ["status": String(process.terminationStatus)]
-            )
-        } catch {
-            diagnosticLogger.log(
-                event: "\(event)_failed",
-                fields: ["error": error.localizedDescription]
-            )
-        }
-    }
 }

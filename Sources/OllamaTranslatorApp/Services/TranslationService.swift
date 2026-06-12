@@ -1,5 +1,6 @@
 import Foundation
 
+/// переводит текст через локальный ollama и не кеширует ответы модели
 struct TranslationService {
     private let ollamaEndpoint: URL
     private let session: URLSession
@@ -8,6 +9,8 @@ struct TranslationService {
 
     init(ollamaEndpoint: URL) {
         let configuration = URLSessionConfiguration.default
+        configuration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        configuration.urlCache = nil
         configuration.timeoutIntervalForRequest = 600
         configuration.timeoutIntervalForResource = 600
 
@@ -43,10 +46,12 @@ struct TranslationService {
             model: model,
             prompt: makeOllamaPrompt(text: text, targetLanguage: targetLanguage),
             stream: false,
+            keepAlive: "30m",
             options: GenerateOptions(numCtx: 8_192)
         )
 
         var request = URLRequest(url: ollamaEndpoint)
+        request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         request.timeoutInterval = 600
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")

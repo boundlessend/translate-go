@@ -181,7 +181,7 @@ enum AppText {
         case .russian:
             return "Результат появится в буфере обмена после готовности."
         case .english:
-            return "The result will be written to the pasteboard when ready."
+            return "The result will be written to the clipboard when ready."
         }
     }
 
@@ -199,7 +199,7 @@ enum AppText {
         case .russian:
             return "Текст записан в буфер обмена."
         case .english:
-            return "Text has been written to the pasteboard."
+            return "Text has been written to the clipboard."
         }
     }
 

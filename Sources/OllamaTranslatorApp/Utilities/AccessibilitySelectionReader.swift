@@ -34,8 +34,7 @@ enum AccessibilitySelectionReader {
             return nil
         }
 
-        let element = value as! AXUIElement
-        return element
+        return (value as! AXUIElement)
     }
 
     private static func copyStringAttribute(from element: AXUIElement, attribute: String) -> String? {

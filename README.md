@@ -1,146 +1,84 @@
-# translate&go
+<p align="center">
+  <img src="Assets/translate_go_readme_icon.png" alt="translate&go app icon" width="128">
+</p>
 
-[![CI](https://github.com/boundlessend/translate-go/actions/workflows/ci.yml/badge.svg)](https://github.com/boundlessend/translate-go/actions/workflows/ci.yml)
-[![Release DMG](https://github.com/boundlessend/translate-go/actions/workflows/release.yml/badge.svg)](https://github.com/boundlessend/translate-go/actions/workflows/release.yml)
-![Swift](https://img.shields.io/badge/Swift-5.9%2B-orange)
-![macOS](https://img.shields.io/badge/macOS-13%2B-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
-![Ollama](https://img.shields.io/badge/Ollama-local-lightgrey)
+<h1 align="center">translate&go</h1>
 
-`translate&go` is a small macOS utility for translating selected text through a local Ollama model.
+<p align="center">
+  <strong>Language:</strong> EN | <a href="README.ru.md">RU</a> | <a href="README.fr.md">FR</a>
+</p>
 
-The app works from the Dock or menu bar, listens for a global hotkey, copies the current selection, sends it to Ollama, and writes the translated result back to the system pasteboard.
+<p align="center">
+  <strong>local text translation in one hotkey</strong>
+</p>
+
+<p align="center">
+  <img alt="CI" src="https://github.com/boundlessend/translate-go/actions/workflows/ci.yml/badge.svg">
+  <img alt="Release" src="https://github.com/boundlessend/translate-go/actions/workflows/release.yml/badge.svg">
+  <img alt="macOS" src="https://img.shields.io/badge/macOS-13%2B-111827">
+  <img alt="Swift" src="https://img.shields.io/badge/Swift-5.9-f05138">
+  <img alt="license" src="https://img.shields.io/badge/license-BSD--3--Clause-2563eb">
+</p>
+
+`translate&go` is a small macOS app that translates selected text with a local Ollama model. Select text in any app, press your hotkey, and paste the translated result from the clipboard.
 
 ## Features
 
-- Swift 5.9+, SwiftUI, AppKit, Swift Concurrency.
-- Global hotkey support through `HotKey`.
-- Ollama `/api/generate` integration.
-- Configurable model, target language, hotkey, Dock visibility, and menu bar visibility.
+- Global hotkey for translating selected text.
+- Local Ollama translation.
+- Model, target language, interface language, Dock, and menu bar settings.
 - English interface by default, with Russian available in Settings.
-- Settings window and Q&A window.
-- Local logging to `~/Library/Logs/translate-go/translator.log`.
+- Settings and Q&A windows.
 
-## Requirements
+## Installation
 
-- macOS 13 or newer.
-- Xcode Command Line Tools or Xcode.
-- Ollama installed locally.
-- A downloaded Ollama model, for example:
-
-```bash
-ollama pull translategemma:4b
-```
-
-## Install
-
-1. Open `translate-go.dmg`.
+1. Download and open `translate-go.dmg`.
 2. Drag `translate&go.app` to `Applications`.
-3. Try to open the app from `Applications`.
-4. If macOS blocks the app because it is unsigned, remove the quarantine attribute:
+3. Open the app from `Applications`.
+4. If macOS blocks the app because it is not notarized, run:
 
 ```bash
 sudo xattr -rd com.apple.quarantine "/Applications/translate&go.app"
 ```
 
-For a custom install path, replace `/Applications/translate&go.app` in the `xattr` command with the real `.app` path.
-
-5. Open the app again.
-6. Allow Accessibility access when prompted.
-7. Install Homebrew if it is not installed:
+5. Open the app again and allow Accessibility access when prompted.
+6. Optional: install Homebrew if you do not already have it:
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-8. Install Ollama if it is not installed:
+7. Install Ollama. If you already have Ollama, skip this step:
 
 ```bash
 brew install ollama
 ```
 
-9. Download a translation model if you have not done that yet:
+8. Download a translation model:
 
 ```bash
-ollama pull translategemma:4b
+ollama pull translategemma:12b
 ```
 
-10. Open translate&go settings in meny bar, choose the model, target language, interface language, and hotkey.
+9. Open Settings, choose the model, target language, interface language, and hotkey.
 
 ## Permissions
 
-The app needs Accessibility permission to send the hotkey and read the selected text flow.
-
-Open:
+Enable `translate&go` in:
 
 ```text
 System Settings -> Privacy & Security -> Accessibility
 ```
 
-Enable:
-
-```text
-/Applications/translate&go.app
-```
-
-If an old entry exists, remove it and add the app again from `/Applications`.
-
-## Ollama
-
-The app expects Ollama at:
-
-```text
-/usr/local/bin/ollama
-```
-
-On launch, it checks the local Ollama server and starts `ollama serve` if needed. On quit, it attempts to stop the configured model and local Ollama processes.
-
-You can choose any installed Ollama model in Settings.
+The app needs this permission to copy selected text with `Command-C`.
 
 ## Usage
 
 1. Select text in any macOS app.
-2. Press the configured global hotkey.
-3. Wait until the translated text is written to the system pasteboard.
+2. Press the configured hotkey.
+3. Wait until the translated text is written to the clipboard.
 4. Paste the result with `Command-V`.
 
-If the hotkey does nothing, check Accessibility permission and make sure the active app has selected text.
+## License
 
-
-## Build
-
-Build the SwiftPM executable:
-
-```bash
-swift build
-```
-
-Build a signed `.app` bundle:
-
-```bash
-./scripts/build_app.sh
-```
-
-The app bundle is written to:
-
-```text
-.build/translate&go.app
-```
-
-Build a DMG:
-
-```bash
-./scripts/build_dmg.sh
-```
-
-The DMG is written to:
-
-```text
-.build/translate-go.dmg
-```
-
-Install and run the app locally:
-
-```bash
-./run_app.command
-```
+BSD 3-Clause. See [LICENSE](LICENSE).

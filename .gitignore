@@ -18,6 +18,7 @@ xcuserdata/
 
 # Local MCP / CodeGraphContext config
 mcp.json
+.cgcignore
 .codegraphcontext/
 
 # Build products and packaged apps
@@ -31,7 +32,3 @@ mcp.json
 # Logs and diagnostics
 *.log
 *.crash
-
-# Optional local packaging extras
-Auto Fix.app/
-Инструкция.pdf

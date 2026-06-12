@@ -65,11 +65,11 @@ struct QAView: View {
             return [
                 QAItem(
                     question: "Как выполнить первую настройку?",
-                    answer: "Откройте Settings. В поле 'Модель' выберите установленную модель из списка. Если список пустой, нажмите 'Скачать модель', найдите модель на сайте, установите её через Terminal командой `ollama pull название:тег`, затем вернитесь в Settings и нажмите 'Обновить модели'. После этого укажите Target language и задайте хоткей."
+                    answer: "Откройте настройки. В поле 'Модель' выберите установленную модель из списка. Если список пустой, нажмите 'Скачать модель', найдите модель на сайте, установите её через Terminal командой `ollama pull название:тег`, затем вернитесь в настройки и нажмите 'Обновить модели'. После этого укажите язык перевода и задайте хоткей."
                 ),
                 QAItem(
                     question: "Как понять, какую модель выбрать?",
-                    answer: "Для перевода лучше выбирать модель, которая уже скачана локально и отображается в списке моделей. Если нужна конкретная модель, скачайте её заранее через `ollama pull`, затем обновите список в Settings."
+                    answer: "Для перевода лучше выбирать модель, которая уже скачана локально и отображается в списке моделей. Если нужна конкретная модель, скачайте её заранее через `ollama pull`, затем обновите список в настройках."
                 ),
                 QAItem(
                     question: "Что делать, если не копируется выделенный текст?",
@@ -77,7 +77,7 @@ struct QAView: View {
                 ),
                 QAItem(
                     question: "Почему модель не появляется в списке?",
-                    answer: "Проверьте, что установлен CLI `/usr/local/bin/ollama` и команда `ollama list` показывает модель. Если модель только что скачана, нажмите 'Обновить модели' в Settings."
+                    answer: "Проверьте, что установлен CLI `/usr/local/bin/ollama` и команда `ollama list` показывает модель. Если модель только что скачана, нажмите 'Обновить модели' в настройках."
                 ),
                 QAItem(
                     question: "Что происходит после нажатия хоткея?",
@@ -108,10 +108,10 @@ struct QAView: View {
                 ),
                 QAItem(
                     question: "What happens after pressing the hotkey?",
-                    answer: "The app copies the selected text, sends it to local translation, and writes the result to the system pasteboard only when it is ready. Pressing the hotkey again cancels the previous task and starts translating the new selection."
+                    answer: "The app copies the selected text, sends it to local translation, and writes the result to the clipboard only when it is ready. Pressing the hotkey again cancels the previous task and starts translating the new selection."
                 ),
                 QAItem(
-                    question: "What if translation does not appear in the pasteboard?",
+                    question: "What if translation does not appear in the clipboard?",
                     answer: "Check that a model is selected, the local server is available, the selection is not empty, and Accessibility is enabled for /Applications/translate&go.app. Detailed errors are shown in the app and written to the log."
                 )
             ]

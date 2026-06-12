@@ -23,6 +23,6 @@
     <key>NSAppleEventsUsageDescription</key>
     <string>translate&amp;go needs permission to send Command-C to the active app.</string>
     <key>NSAccessibilityUsageDescription</key>
-    <string>translate&amp;go needs Accessibility access to copy selected text and write the translation to the pasteboard.</string>
+    <string>translate&amp;go needs Accessibility access to copy selected text and write the translation to the clipboard.</string>
 </dict>
 </plist>
