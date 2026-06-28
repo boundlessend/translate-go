@@ -7,6 +7,10 @@ struct SettingsView: View {
     @State private var alertTitle = ""
     @State private var alertMessage = ""
     @State private var isAlertVisible = false
+    @State private var isCheckingUpdate = false
+    @State private var updateResult: UpdateCheckResult?
+
+    private let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
 
     var body: some View {
         let language = viewModel.interfaceLanguage
@@ -85,6 +89,42 @@ struct SettingsView: View {
             }
 
             Section {
+                HStack {
+                    Text(AppText.currentVersionLabel(language))
+                    Spacer()
+                    Text(currentVersion)
+                        .foregroundStyle(.secondary)
+                }
+
+                HStack {
+                    Button(AppText.checkUpdateButton(language)) {
+                        checkForUpdate()
+                    }
+                    .disabled(isCheckingUpdate)
+
+                    if isCheckingUpdate {
+                        ProgressView()
+                            .controlSize(.small)
+                    }
+                }
+
+                if let result = updateResult {
+                    if result.isUpdateAvailable {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(AppText.updateAvailableMessage(language, version: result.latestVersion))
+                                .foregroundStyle(.secondary)
+                            Button(AppText.openReleaseButton(language)) {
+                                NSWorkspace.shared.open(result.releaseURL)
+                            }
+                        }
+                    } else {
+                        Text(AppText.upToDateMessage(language))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+
+            Section {
                 Text("© boundlessend")
                     .foregroundStyle(.secondary)
             }
@@ -120,6 +160,26 @@ struct SettingsView: View {
     private func openModelSearch() {
         let url = URL(string: "https://ollama.com/search")!
         NSWorkspace.shared.open(url)
+    }
+
+    private func checkForUpdate() {
+        isCheckingUpdate = true
+
+        Task {
+            do {
+                let endpoint = URL(
+                    string: "https://api.github.com/repos/boundlessend/translate-go/releases/latest"
+                )!
+                let checker = UpdateChecker(releasesEndpoint: endpoint)
+                updateResult = try await checker.checkForUpdate(currentVersion: currentVersion)
+            } catch {
+                alertTitle = AppText.errorTitle(viewModel.interfaceLanguage)
+                alertMessage = error.localizedDescription
+                isAlertVisible = true
+            }
+
+            isCheckingUpdate = false
+        }
     }
 
     private func handleHotkeyRecord(_ result: Result<HotkeyConfiguration, Error>) {

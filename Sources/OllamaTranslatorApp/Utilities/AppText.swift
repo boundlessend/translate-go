@@ -279,4 +279,49 @@ enum AppText {
             return "Later"
         }
     }
+
+    static func currentVersionLabel(_ language: AppLanguage) -> String {
+        switch language {
+        case .russian:
+            return "Текущая версия"
+        case .english:
+            return "Current version"
+        }
+    }
+
+    static func checkUpdateButton(_ language: AppLanguage) -> String {
+        switch language {
+        case .russian:
+            return "Проверить обновления"
+        case .english:
+            return "Check for updates"
+        }
+    }
+
+    static func upToDateMessage(_ language: AppLanguage) -> String {
+        switch language {
+        case .russian:
+            return "Установлена последняя версия"
+        case .english:
+            return "You have the latest version"
+        }
+    }
+
+    static func updateAvailableMessage(_ language: AppLanguage, version: String) -> String {
+        switch language {
+        case .russian:
+            return "Доступна версия \(version)"
+        case .english:
+            return "Version \(version) is available"
+        }
+    }
+
+    static func openReleaseButton(_ language: AppLanguage) -> String {
+        switch language {
+        case .russian:
+            return "Открыть страницу релиза"
+        case .english:
+            return "Open release page"
+        }
+    }
 }
