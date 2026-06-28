@@ -27,7 +27,14 @@ jobs:
             ${{ runner.os }}-spm-
 
       - name: Install DMG builder
-        run: brew install create-dmg
+        run: npm install --global create-dmg
+
+      - name: Set version from tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${VERSION#.}"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" Sources/OllamaTranslatorApp/Info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $VERSION" Sources/OllamaTranslatorApp/Info.plist
 
       - name: Build DMG
         run: ./scripts/build_dmg.sh
