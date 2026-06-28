@@ -24,8 +24,9 @@
 
 ## Features
 
-- Global hotkey for translating selected text.
+- Global hotkey for translating selected text (default `⌃C`).
 - Local Ollama translation.
+- Automatic start, model preload, and shutdown of the local Ollama server.
 - Model, target language, interface language, Dock, and menu bar settings.
 - English interface by default, with Russian available in Settings.
 - Settings and Q&A windows.
