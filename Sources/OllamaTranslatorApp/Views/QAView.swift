@@ -65,55 +65,67 @@ struct QAView: View {
             return [
                 QAItem(
                     question: "Как выполнить первую настройку?",
-                    answer: "Откройте настройки. В поле 'Модель' выберите установленную модель из списка. Если список пустой, нажмите 'Скачать модель', найдите модель на сайте, установите её через Terminal командой `ollama pull название:тег`, затем вернитесь в настройки и нажмите 'Обновить модели'. После этого укажите язык перевода и задайте хоткей."
+                    answer:
+                        "Откройте настройки. В поле 'Модель' выберите установленную модель из списка. Если список пустой, нажмите 'Скачать модель', найдите модель на сайте, установите её через Terminal командой `ollama pull название:тег`, затем вернитесь в настройки и нажмите 'Обновить модели'. После этого укажите язык перевода и задайте хоткей."
                 ),
                 QAItem(
                     question: "Как понять, какую модель выбрать?",
-                    answer: "Для перевода лучше выбирать модель, которая уже скачана локально и отображается в списке моделей. Если нужна конкретная модель, скачайте её заранее через `ollama pull`, затем обновите список в настройках."
+                    answer:
+                        "Для перевода лучше выбирать модель, которая уже скачана локально и отображается в списке моделей. Если нужна конкретная модель, скачайте её заранее через `ollama pull`, затем обновите список в настройках."
                 ),
                 QAItem(
                     question: "Что делать, если не копируется выделенный текст?",
-                    answer: "Проверьте System Settings -> Privacy & Security -> Accessibility. В списке должен быть включён /Applications/translate&go.app. Если там старая запись, удалите её и добавьте приложение заново."
+                    answer:
+                        "Проверьте System Settings -> Privacy & Security -> Accessibility. В списке должен быть включён /Applications/translate&go.app. Если там старая запись, удалите её и добавьте приложение заново."
                 ),
                 QAItem(
                     question: "Почему модель не появляется в списке?",
-                    answer: "Проверьте, что установлен CLI `/usr/local/bin/ollama` и команда `ollama list` показывает модель. Если модель только что скачана, нажмите 'Обновить модели' в настройках."
+                    answer:
+                        "Проверьте, что установлен CLI `/usr/local/bin/ollama` и команда `ollama list` показывает модель. Если модель только что скачана, нажмите 'Обновить модели' в настройках."
                 ),
                 QAItem(
                     question: "Что происходит после нажатия хоткея?",
-                    answer: "Приложение копирует выделенный текст, отправляет его на локальный перевод и записывает результат в системный буфер обмена только после готовности. Если нажать хоткей ещё раз, предыдущая задача отменится и начнётся перевод нового выделения."
+                    answer:
+                        "Приложение копирует выделенный текст, отправляет его на локальный перевод и записывает результат в системный буфер обмена только после готовности. Если нажать хоткей ещё раз, предыдущая задача отменится и начнётся перевод нового выделения."
                 ),
                 QAItem(
                     question: "Что делать, если перевод не появляется в буфере?",
-                    answer: "Проверьте, что модель выбрана, локальный сервер доступен, выделение не пустое, а в Accessibility включён именно файл /Applications/translate&go.app. Подробная ошибка показывается в окне приложения и пишется в лог."
-                )
+                    answer:
+                        "Проверьте, что модель выбрана, локальный сервер доступен, выделение не пустое, а в Accessibility включён именно файл /Applications/translate&go.app. Подробная ошибка показывается в окне приложения и пишется в лог."
+                ),
             ]
         case .english:
             return [
                 QAItem(
                     question: "How do I set up the app for the first time?",
-                    answer: "Open Settings. In Model, choose an installed model. If the list is empty, click Download model, find a model on the website, install it in Terminal with `ollama pull model:tag`, then return to Settings and click Refresh models. After that, set Target language and choose a hotkey."
+                    answer:
+                        "Open Settings. In Model, choose an installed model. If the list is empty, click Download model, find a model on the website, install it in Terminal with `ollama pull model:tag`, then return to Settings and click Refresh models. After that, set Target language and choose a hotkey."
                 ),
                 QAItem(
                     question: "Which model should I choose?",
-                    answer: "For translation, choose a model that is already downloaded locally and appears in the model list. If you need a specific model, download it first with `ollama pull`, then refresh the list in Settings."
+                    answer:
+                        "For translation, choose a model that is already downloaded locally and appears in the model list. If you need a specific model, download it first with `ollama pull`, then refresh the list in Settings."
                 ),
                 QAItem(
                     question: "What if selected text is not copied?",
-                    answer: "Check System Settings -> Privacy & Security -> Accessibility. /Applications/translate&go.app must be enabled. If an old entry exists, remove it and add the app again."
+                    answer:
+                        "Check System Settings -> Privacy & Security -> Accessibility. /Applications/translate&go.app must be enabled. If an old entry exists, remove it and add the app again."
                 ),
                 QAItem(
                     question: "Why is my model missing from the list?",
-                    answer: "Check that `/usr/local/bin/ollama` is installed and `ollama list` shows the model. If you downloaded the model recently, click Refresh models in Settings."
+                    answer:
+                        "Check that `/usr/local/bin/ollama` is installed and `ollama list` shows the model. If you downloaded the model recently, click Refresh models in Settings."
                 ),
                 QAItem(
                     question: "What happens after pressing the hotkey?",
-                    answer: "The app copies the selected text, sends it to local translation, and writes the result to the clipboard only when it is ready. Pressing the hotkey again cancels the previous task and starts translating the new selection."
+                    answer:
+                        "The app copies the selected text, sends it to local translation, and writes the result to the clipboard only when it is ready. Pressing the hotkey again cancels the previous task and starts translating the new selection."
                 ),
                 QAItem(
                     question: "What if translation does not appear in the clipboard?",
-                    answer: "Check that a model is selected, the local server is available, the selection is not empty, and Accessibility is enabled for /Applications/translate&go.app. Detailed errors are shown in the app and written to the log."
-                )
+                    answer:
+                        "Check that a model is selected, the local server is available, the selection is not empty, and Accessibility is enabled for /Applications/translate&go.app. Detailed errors are shown in the app and written to the log."
+                ),
             ]
         }
     }

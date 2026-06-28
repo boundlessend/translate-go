@@ -16,7 +16,8 @@ struct HotkeyValidator {
     }
 
     private func isReservedBySystem(_ keyCombo: KeyCombo) -> Bool {
-        let reservedCombos = KeyCombo.systemKeyCombos()
+        let reservedCombos =
+            KeyCombo.systemKeyCombos()
             + KeyCombo.standardKeyCombos()
             + KeyCombo.mainMenuKeyCombos()
 
@@ -25,7 +26,7 @@ struct HotkeyValidator {
 
     private func validateRegistration(_ configuration: HotkeyConfiguration) throws {
         var hotKeyRef: EventHotKeyRef?
-        let hotKeyID = EventHotKeyID(signature: OSType(0x7472676F), id: UInt32.random(in: 1...UInt32.max))
+        let hotKeyID = EventHotKeyID(signature: OSType(0x7472_676F), id: UInt32.random(in: 1...UInt32.max))
         let status = RegisterEventHotKey(
             configuration.carbonKeyCode,
             configuration.carbonModifiers,

@@ -50,7 +50,8 @@ final class SettingsViewModel: ObservableObject {
         self.hotkeyValidator = HotkeyValidator()
 
         let storedModel = userDefaults.string(forKey: UserDefaultsKey.model)
-        let normalizedModel = storedModel?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedModel =
+            storedModel?.trimmingCharacters(in: .whitespacesAndNewlines)
             ?? OllamaModelPreset.translateGemma12b.rawValue
         self.model = normalizedModel
         self.availableModels = []
@@ -61,7 +62,8 @@ final class SettingsViewModel: ObservableObject {
         self.interfaceLanguage = AppLanguage.current(userDefaults: userDefaults)
 
         let storedHotkeyData = userDefaults.data(forKey: UserDefaultsKey.hotkeyConfiguration)
-        self.hotkeyConfiguration = storedHotkeyData.flatMap(HotkeyConfiguration.decode(data:))
+        self.hotkeyConfiguration =
+            storedHotkeyData.flatMap(HotkeyConfiguration.decode(data:))
             ?? HotkeyConfiguration.controlC()
 
         self.isDockVisible = userDefaults.object(forKey: UserDefaultsKey.isDockVisible) as? Bool ?? true

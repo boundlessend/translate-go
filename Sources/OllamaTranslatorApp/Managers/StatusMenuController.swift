@@ -7,7 +7,10 @@ final class StatusMenuController {
     private let settingsItem: NSMenuItem
     private let quitItem: NSMenuItem
 
-    init(openSettings: @escaping () -> Void, openQA: @escaping () -> Void, quit: @escaping () -> Void, language: AppLanguage) {
+    init(
+        openSettings: @escaping () -> Void, openQA: @escaping () -> Void, quit: @escaping () -> Void,
+        language: AppLanguage
+    ) {
         self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         self.menu = NSMenu()
 
@@ -21,7 +24,8 @@ final class StatusMenuController {
         settingsItem.target = target
         qaItem.target = target
         quitItem.target = target
-        settingsItem.image = NSImage(systemSymbolName: "gearshape", accessibilityDescription: AppText.settingsTitle(language))
+        settingsItem.image = NSImage(
+            systemSymbolName: "gearshape", accessibilityDescription: AppText.settingsTitle(language))
         qaItem.image = NSImage(systemSymbolName: "questionmark.circle", accessibilityDescription: "Q&A")
         menu.addItem(settingsItem)
         menu.addItem(qaItem)
@@ -33,7 +37,8 @@ final class StatusMenuController {
         statusItem.menu = menu
         statusItem.isVisible = false
 
-        objc_setAssociatedObject(menu, Unmanaged.passUnretained(self).toOpaque(), target, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        objc_setAssociatedObject(
+            menu, Unmanaged.passUnretained(self).toOpaque(), target, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
     }
 
     func setVisible(_ isVisible: Bool) {
@@ -52,7 +57,8 @@ final class StatusMenuController {
             return
         }
 
-        let image = NSImage(systemSymbolName: "character.bubble", accessibilityDescription: AppText.statusItemDescription(language))
+        let image = NSImage(
+            systemSymbolName: "character.bubble", accessibilityDescription: AppText.statusItemDescription(language))
         image?.isTemplate = true
 
         button.title = ""

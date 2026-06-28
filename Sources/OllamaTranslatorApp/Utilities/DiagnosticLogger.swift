@@ -24,7 +24,8 @@ struct DiagnosticLogger {
 
     func log(event: String, fields: [String: String]) {
         let timestamp = ISO8601DateFormatter().string(from: Date())
-        let formattedFields = fields
+        let formattedFields =
+            fields
             .map { key, value in "\(key)=\(escaped(value))" }
             .sorted()
             .joined(separator: " ")

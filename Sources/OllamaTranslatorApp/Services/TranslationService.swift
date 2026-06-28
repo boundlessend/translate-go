@@ -34,7 +34,8 @@ struct TranslationService {
 
         for chunk in chunks {
             try Task.checkCancellation()
-            let translatedChunk = try await translateOllamaChunk(text: chunk, model: model, targetLanguage: targetLanguage)
+            let translatedChunk = try await translateOllamaChunk(
+                text: chunk, model: model, targetLanguage: targetLanguage)
             translatedChunks.append(translatedChunk)
         }
 
@@ -111,17 +112,18 @@ struct TranslationService {
     }
 
     private func cleanTranslation(_ text: String) -> String {
-        let lines = text
+        let lines =
+            text
             .replacingOccurrences(of: "**", with: "")
             .components(separatedBy: .newlines)
             .map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { line in
                 line.isEmpty
                     || line.hasPrefix("*") == false
-                    && line.lowercased().hasPrefix("option") == false
-                    && line.lowercased().hasPrefix("here") == false
-                    && line.lowercased().hasPrefix("the best") == false
-                    && line.lowercased().hasPrefix("explanation") == false
+                        && line.lowercased().hasPrefix("option") == false
+                        && line.lowercased().hasPrefix("here") == false
+                        && line.lowercased().hasPrefix("the best") == false
+                        && line.lowercased().hasPrefix("explanation") == false
             }
 
         guard lines.isEmpty == false else {
@@ -137,7 +139,8 @@ struct TranslationService {
             return [normalizedText]
         }
 
-        let paragraphs: [String] = normalizedText
+        let paragraphs: [String] =
+            normalizedText
             .components(separatedBy: "\n\n")
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { $0.isEmpty == false }
@@ -173,7 +176,8 @@ struct TranslationService {
     }
 
     private func splitLongParagraph(_ paragraph: String, maxLength: Int) -> [String] {
-        let sentences: [String] = paragraph
+        let sentences: [String] =
+            paragraph
             .components(separatedBy: ". ")
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { $0.isEmpty == false }

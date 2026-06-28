@@ -44,7 +44,7 @@ final class OllamaRuntimeManager {
     func stopOnApplicationExit() {
         stopModel()
         stopOwnedServeProcess()
-    }   
+    }
 
     private func isOllamaReady() async -> Bool {
         var request = URLRequest(url: tagsEndpoint)
@@ -141,7 +141,7 @@ final class OllamaRuntimeManager {
                 event: "ollama_model_stop_finished",
                 fields: [
                     "model": model,
-                    "status": String(process.terminationStatus)
+                    "status": String(process.terminationStatus),
                 ]
             )
         } catch {

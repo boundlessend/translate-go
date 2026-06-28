@@ -241,7 +241,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             event: "hotkey_received",
             fields: [
                 "frontmostApplication": lastFocusedApplication?.localizedName ?? "<none>",
-                "generation": String(generation)
+                "generation": String(generation),
             ]
         )
         currentTranslationTask?.cancel()
@@ -266,7 +266,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 event: "copy_selection_finished",
                 fields: [
                     "generation": String(generation),
-                    "textLength": String(selectedText.count)
+                    "textLength": String(selectedText.count),
                 ]
             )
             let language = settingsViewModel.interfaceLanguage
@@ -278,7 +278,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 event: "translation_started",
                 fields: [
                     "generation": String(generation),
-                    "model": settingsViewModel.model
+                    "model": settingsViewModel.model,
                 ]
             )
             let translatedText = try await translationService.translate(
@@ -292,7 +292,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 event: "translation_finished",
                 fields: [
                     "generation": String(generation),
-                    "textLength": String(translatedText.count)
+                    "textLength": String(translatedText.count),
                 ]
             )
             try writeTextToPasteboard(translatedText)
@@ -315,7 +315,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 event: "translation_failed",
                 fields: [
                     "generation": String(generation),
-                    "error": error.localizedDescription
+                    "error": error.localizedDescription,
                 ]
             )
             do {
@@ -336,12 +336,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         if let text = AccessibilitySelectionReader.readSelectedText(from: lastFocusedApplication),
-           text.isEmpty == false {
+            text.isEmpty == false
+        {
             diagnosticLogger.log(
                 event: "accessibility_selection_read",
                 fields: [
                     "application": lastFocusedApplication?.localizedName ?? "<none>",
-                    "textLength": String(text.count)
+                    "textLength": String(text.count),
                 ]
             )
             return text

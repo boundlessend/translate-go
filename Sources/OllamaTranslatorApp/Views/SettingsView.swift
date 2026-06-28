@@ -53,7 +53,9 @@ struct SettingsView: View {
                             .font(.system(.title3, design: .monospaced))
                             .frame(width: 90, alignment: .leading)
 
-                        Button(isRecordingHotkey ? AppText.pressShortcutButton(language) : AppText.changeButton(language)) {
+                        Button(
+                            isRecordingHotkey ? AppText.pressShortcutButton(language) : AppText.changeButton(language)
+                        ) {
                             isRecordingHotkey = true
                         }
 

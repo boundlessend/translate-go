@@ -243,22 +243,22 @@ enum AppText {
         switch language {
         case .russian:
             return """
-            Откройте System Settings → Privacy & Security → Accessibility и включите translate&go.
+                Откройте System Settings → Privacy & Security → Accessibility и включите translate&go.
 
-            Если приложение уже есть в списке, удалите старую запись, добавьте заново файл:
-            /Applications/translate&go.app
+                Если приложение уже есть в списке, удалите старую запись, добавьте заново файл:
+                /Applications/translate&go.app
 
-            После этого перезапустите приложение через run_app.command.
-            """
+                После этого перезапустите приложение через run_app.command.
+                """
         case .english:
             return """
-            Open System Settings → Privacy & Security → Accessibility and enable translate&go.
+                Open System Settings → Privacy & Security → Accessibility and enable translate&go.
 
-            If the app is already in the list, remove the old entry and add this file again:
-            /Applications/translate&go.app
+                If the app is already in the list, remove the old entry and add this file again:
+                /Applications/translate&go.app
 
-            After that, restart the app with run_app.command.
-            """
+                After that, restart the app with run_app.command.
+                """
         }
     }
 

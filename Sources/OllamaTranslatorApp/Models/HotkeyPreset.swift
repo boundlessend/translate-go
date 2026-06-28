@@ -65,7 +65,7 @@ struct HotkeyConfiguration: Codable, Equatable {
             UInt32(kVK_Control),
             UInt32(kVK_RightControl),
             UInt32(kVK_Function),
-            UInt32(kVK_CapsLock)
+            UInt32(kVK_CapsLock),
         ])
     }
 
@@ -74,7 +74,7 @@ struct HotkeyConfiguration: Codable, Equatable {
             modifiers.contains(.control) ? "⌃" : "",
             modifiers.contains(.option) ? "⌥" : "",
             modifiers.contains(.shift) ? "⇧" : "",
-            modifiers.contains(.command) ? "⌘" : ""
+            modifiers.contains(.command) ? "⌘" : "",
         ].joined()
     }
 

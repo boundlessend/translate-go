@@ -11,6 +11,20 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  lint:
+    name: Lint Swift formatting
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install swift-format
+        run: brew install swift-format
+
+      - name: Lint
+        run: swift-format lint --strict --recursive --configuration .swift-format Sources
+
   build:
     name: Build macOS app
     runs-on: macos-14

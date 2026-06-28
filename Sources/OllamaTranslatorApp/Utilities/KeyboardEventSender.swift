@@ -8,7 +8,8 @@ enum KeyboardEventSender {
         }
 
         guard let keyDown = CGEvent(keyboardEventSource: source, virtualKey: keyCodeForC, keyDown: true),
-              let keyUp = CGEvent(keyboardEventSource: source, virtualKey: keyCodeForC, keyDown: false) else {
+            let keyUp = CGEvent(keyboardEventSource: source, virtualKey: keyCodeForC, keyDown: false)
+        else {
             throw AppError.unexpected(NSError(domain: "KeyboardEventSender", code: 2))
         }
 

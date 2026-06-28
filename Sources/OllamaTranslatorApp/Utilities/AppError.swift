@@ -32,7 +32,8 @@ enum AppError: LocalizedError {
     private var russianDescription: String {
         switch self {
         case .accessibilityPermissionMissing:
-            return "Нет разрешения Accessibility. Разрешите приложению управление компьютером в System Settings → Privacy & Security → Accessibility."
+            return
+                "Нет разрешения Accessibility. Разрешите приложению управление компьютером в System Settings → Privacy & Security → Accessibility."
         case .emptyPasteboard:
             return "Выделенный текст не найден. Выделите текст в активном приложении и повторите."
         case .emptyTranslation:
@@ -40,12 +41,13 @@ enum AppError: LocalizedError {
         case .invalidResponse:
             return "Ollama вернула ответ без HTTP-статуса."
         case .copySelectionTimedOut:
-            return "Не удалось получить выделенный текст через Command-C. Проверьте выделение текста и разрешение Accessibility."
+            return
+                "Не удалось получить выделенный текст через Command-C. Проверьте выделение текста и разрешение Accessibility."
         case .pasteboardWriteFailed:
             return "Не удалось записать перевод в системный буфер обмена."
         case .pasteboardRestoreFailed:
             return "Не удалось восстановить предыдущий системный буфер обмена после ошибки."
-        case let .ollamaExecutableMissing(path):
+        case .ollamaExecutableMissing(let path):
             return "Ollama не найден по пути \(path). Установите Ollama или добавьте бинарь в этот путь."
         case .ollamaStartupTimedOut:
             return "Ollama не запустилась за отведённое время."
@@ -53,19 +55,19 @@ enum AppError: LocalizedError {
             return "Хоткей должен содержать хотя бы один модификатор: Control, Option, Shift или Command."
         case .hotkeyInvalidKey:
             return "Нажмите обычную клавишу вместе с модификатором."
-        case let .hotkeyReservedBySystem(hotkey):
+        case .hotkeyReservedBySystem(let hotkey):
             return "Хоткей \(hotkey) уже используется macOS или меню приложения. Выберите другое сочетание."
-        case let .hotkeyRegistrationFailed(hotkey):
+        case .hotkeyRegistrationFailed(let hotkey):
             return "Хоткей \(hotkey) уже используется другой программой. Выберите другое сочетание."
-        case let .ollamaCommandFailed(command, statusCode, output):
+        case .ollamaCommandFailed(let command, let statusCode, let output):
             return "Команда \(command) завершилась с кодом \(statusCode). Ответ: \(output)"
-        case let .ollamaHTTPError(statusCode, body):
+        case .ollamaHTTPError(let statusCode, let body):
             return "Ollama вернула HTTP \(statusCode). Тело ответа: \(body)"
-        case let .networkUnavailable(error):
+        case .networkUnavailable(let error):
             return "Не удалось выполнить сетевой запрос. Ошибка: \(error.localizedDescription)"
-        case let .decodingFailed(error):
+        case .decodingFailed(let error):
             return "Не удалось разобрать JSON ответа переводчика. Ошибка: \(error.localizedDescription)"
-        case let .unexpected(error):
+        case .unexpected(let error):
             return "Неожиданная ошибка: \(error.localizedDescription)"
         }
     }
@@ -73,7 +75,8 @@ enum AppError: LocalizedError {
     private var englishDescription: String {
         switch self {
         case .accessibilityPermissionMissing:
-            return "Accessibility permission is missing. Allow this app to control your computer in System Settings → Privacy & Security → Accessibility."
+            return
+                "Accessibility permission is missing. Allow this app to control your computer in System Settings → Privacy & Security → Accessibility."
         case .emptyPasteboard:
             return "Selected text was not found. Select text in the active app and try again."
         case .emptyTranslation:
@@ -86,7 +89,7 @@ enum AppError: LocalizedError {
             return "Could not write the translation to the clipboard."
         case .pasteboardRestoreFailed:
             return "Could not restore the previous clipboard after an error."
-        case let .ollamaExecutableMissing(path):
+        case .ollamaExecutableMissing(let path):
             return "Ollama was not found at \(path). Install Ollama or add the binary to this path."
         case .ollamaStartupTimedOut:
             return "Ollama did not start in time."
@@ -94,19 +97,19 @@ enum AppError: LocalizedError {
             return "The hotkey must include at least one modifier: Control, Option, Shift, or Command."
         case .hotkeyInvalidKey:
             return "Press a regular key together with a modifier."
-        case let .hotkeyReservedBySystem(hotkey):
+        case .hotkeyReservedBySystem(let hotkey):
             return "Hotkey \(hotkey) is already used by macOS or the app menu. Choose another shortcut."
-        case let .hotkeyRegistrationFailed(hotkey):
+        case .hotkeyRegistrationFailed(let hotkey):
             return "Hotkey \(hotkey) is already used by another app. Choose another shortcut."
-        case let .ollamaCommandFailed(command, statusCode, output):
+        case .ollamaCommandFailed(let command, let statusCode, let output):
             return "Command \(command) exited with code \(statusCode). Output: \(output)"
-        case let .ollamaHTTPError(statusCode, body):
+        case .ollamaHTTPError(let statusCode, let body):
             return "Ollama returned HTTP \(statusCode). Response body: \(body)"
-        case let .networkUnavailable(error):
+        case .networkUnavailable(let error):
             return "Network request failed. Error: \(error.localizedDescription)"
-        case let .decodingFailed(error):
+        case .decodingFailed(let error):
             return "Could not parse translator JSON response. Error: \(error.localizedDescription)"
-        case let .unexpected(error):
+        case .unexpected(let error):
             return "Unexpected error: \(error.localizedDescription)"
         }
     }

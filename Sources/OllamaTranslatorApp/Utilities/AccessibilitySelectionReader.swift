@@ -1,5 +1,5 @@
-import ApplicationServices
 import AppKit
+import ApplicationServices
 import Foundation
 
 enum AccessibilitySelectionReader {
@@ -9,10 +9,12 @@ enum AccessibilitySelectionReader {
         }
 
         let appElement = AXUIElementCreateApplication(processIdentifier)
-        guard let focusedElement = copyElementAttribute(
-            from: appElement,
-            attribute: kAXFocusedUIElementAttribute
-        ) else {
+        guard
+            let focusedElement = copyElementAttribute(
+                from: appElement,
+                attribute: kAXFocusedUIElementAttribute
+            )
+        else {
             return nil
         }
 
