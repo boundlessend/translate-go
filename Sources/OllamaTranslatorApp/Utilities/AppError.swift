@@ -16,6 +16,7 @@ enum AppError: LocalizedError {
     case hotkeyRegistrationFailed(hotkey: String)
     case ollamaCommandFailed(command: String, statusCode: Int32, output: String)
     case ollamaHTTPError(statusCode: Int, body: String)
+    case githubHTTPError(statusCode: Int, body: String)
     case networkUnavailable(URLError)
     case decodingFailed(DecodingError)
     case unexpected(Error)
@@ -63,6 +64,8 @@ enum AppError: LocalizedError {
             return "Команда \(command) завершилась с кодом \(statusCode). Ответ: \(output)"
         case .ollamaHTTPError(let statusCode, let body):
             return "Ollama вернула HTTP \(statusCode). Тело ответа: \(body)"
+        case .githubHTTPError(let statusCode, let body):
+            return "GitHub вернул HTTP \(statusCode). Тело ответа: \(body)"
         case .networkUnavailable(let error):
             return "Не удалось выполнить сетевой запрос. Ошибка: \(error.localizedDescription)"
         case .decodingFailed(let error):
@@ -105,6 +108,8 @@ enum AppError: LocalizedError {
             return "Command \(command) exited with code \(statusCode). Output: \(output)"
         case .ollamaHTTPError(let statusCode, let body):
             return "Ollama returned HTTP \(statusCode). Response body: \(body)"
+        case .githubHTTPError(let statusCode, let body):
+            return "GitHub returned HTTP \(statusCode). Response body: \(body)"
         case .networkUnavailable(let error):
             return "Network request failed. Error: \(error.localizedDescription)"
         case .decodingFailed(let error):
