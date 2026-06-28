@@ -40,6 +40,6 @@ jobs:
         run: ./scripts/build_dmg.sh
 
       - name: Upload DMG to GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: .build/translate-go.dmg
