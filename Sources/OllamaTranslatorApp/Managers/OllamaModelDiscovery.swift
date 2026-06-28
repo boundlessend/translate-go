@@ -1,12 +1,6 @@
 import Foundation
 
 final class OllamaModelDiscovery {
-    private let executablePath: String
-
-    init(executablePath: String) {
-        self.executablePath = executablePath
-    }
-
     func fetchModels() throws -> [String] {
         let listModels = try runOllama(arguments: ["list"])
         let runningModels = try runOllama(arguments: ["ps"])
@@ -19,6 +13,10 @@ final class OllamaModelDiscovery {
     }
 
     private func runOllama(arguments: [String]) throws -> String {
+        guard let executablePath = OllamaExecutable.resolvedPath() else {
+            throw AppError.ollamaExecutableMissing(path: OllamaExecutable.candidatePaths.joined(separator: ", "))
+        }
+
         let process = Process()
         let outputPipe = Pipe()
         let errorPipe = Pipe()

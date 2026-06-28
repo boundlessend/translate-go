@@ -81,7 +81,7 @@ struct QAView: View {
                 QAItem(
                     question: "Почему модель не появляется в списке?",
                     answer:
-                        "Проверьте, что установлен CLI `/usr/local/bin/ollama` и команда `ollama list` показывает модель. Если модель только что скачана, нажмите 'Обновить модели' в настройках."
+                        "Проверьте, что ollama установлена и команда `ollama list` показывает модель. Если модель только что скачана, нажмите 'Обновить модели' в настройках."
                 ),
                 QAItem(
                     question: "Что происходит после нажатия хоткея?",
@@ -114,7 +114,7 @@ struct QAView: View {
                 QAItem(
                     question: "Why is my model missing from the list?",
                     answer:
-                        "Check that `/usr/local/bin/ollama` is installed and `ollama list` shows the model. If you downloaded the model recently, click Refresh models in Settings."
+                        "Check that ollama is installed and `ollama list` shows the model. If you downloaded the model recently, click Refresh models in Settings."
                 ),
                 QAItem(
                     question: "What happens after pressing the hotkey?",

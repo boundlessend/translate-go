@@ -64,11 +64,11 @@ final class OllamaRuntimeManager {
     }
 
     private func startOllamaServe() throws {
-        let executableURL = URL(fileURLWithPath: "/usr/local/bin/ollama")
-        guard FileManager.default.isExecutableFile(atPath: executableURL.path) else {
-            throw AppError.ollamaExecutableMissing(path: executableURL.path)
+        guard let executablePath = OllamaExecutable.resolvedPath() else {
+            throw AppError.ollamaExecutableMissing(path: OllamaExecutable.candidatePaths.joined(separator: ", "))
         }
 
+        let executableURL = URL(fileURLWithPath: executablePath)
         let process = Process()
         process.executableURL = executableURL
         process.arguments = ["serve"]
@@ -122,12 +122,12 @@ final class OllamaRuntimeManager {
     }
 
     private func stopModel() {
-        let executableURL = URL(fileURLWithPath: "/usr/local/bin/ollama")
-        guard FileManager.default.isExecutableFile(atPath: executableURL.path) else {
+        guard let executablePath = OllamaExecutable.resolvedPath() else {
             diagnosticLogger.log(event: "ollama_stop_skipped", fields: ["reason": "executable_missing"])
             return
         }
 
+        let executableURL = URL(fileURLWithPath: executablePath)
         let process = Process()
         process.executableURL = executableURL
         process.arguments = ["stop", model]

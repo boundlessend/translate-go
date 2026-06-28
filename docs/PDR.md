@@ -95,7 +95,7 @@ OllamaTranslatorApp (@main, SwiftUI App)
 - при запуске приложения: проверка доступности через `GET /api/tags`; если сервер не отвечает, запуск `ollama serve` как дочернего процесса и ожидание готовности (до 100 попыток по 100 мс = ~10 с)
 - прогрев модели по умолчанию пустым запросом с `keep_alive=30m`
 - при выходе: `ollama stop <model>` и завершение собственного процесса `serve` (если запускали его сами)
-- путь к CLI зафиксирован: `/usr/local/bin/ollama`
+- путь к CLI определяется автоматически (`OllamaExecutable`): первый существующий из `/opt/homebrew/bin/ollama`, `/usr/local/bin/ollama` (Homebrew на Apple Silicon и официальный установщик)
 
 ## 7. Разрешения и безопасность
 
@@ -124,11 +124,11 @@ OllamaTranslatorApp (@main, SwiftUI App)
 | Видимость в Dock | да |
 | Видимость в menu bar | да |
 | Эндпоинт Ollama | `http://localhost:11434` |
-| Путь к CLI Ollama | `/usr/local/bin/ollama` |
+| Путь к CLI Ollama | автоопределение: `/opt/homebrew/bin/ollama`, затем `/usr/local/bin/ollama` |
 
 ## 10. Известные ограничения и технический долг
 
-- Путь к Ollama зафиксирован как `/usr/local/bin/ollama`, тогда как README предлагает `brew install ollama`. На Apple Silicon Homebrew ставит CLI в `/opt/homebrew/bin/ollama`, поэтому автозапуск сервера и обнаружение моделей сработают только если CLI доступен по `/usr/local/bin/ollama` (как делает официальный установщик Ollama). Кандидат на исправление: проверять оба пути или искать через `PATH`.
-- `CFBundleShortVersionString` в `Info.plist` = `1.0` и не синхронизируется с тегами релизов (`v.1.5.0`).
+- Путь к Ollama определяется только среди фиксированных кандидатов (`/opt/homebrew/bin/ollama`, `/usr/local/bin/ollama`); нестандартная установка не будет найдена. Кандидат на развитие: путь в настройках или поиск через `PATH`.
+- `CFBundleShortVersionString` в `Info.plist` = `1.0` для локальных и CI-сборок; в релизных DMG версия подставляется из git-тега в workflow.
 - Перечень моделей в пресетах ограничен одной (`translategemma:12b`); фактический выбор идёт из локально установленных моделей.
 - Чанки переводятся последовательно, без параллелизма; для очень длинного текста это сказывается на времени.

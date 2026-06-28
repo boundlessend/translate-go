@@ -46,7 +46,7 @@ final class SettingsViewModel: ObservableObject {
 
     init(userDefaults: UserDefaults) {
         self.userDefaults = userDefaults
-        self.modelDiscovery = OllamaModelDiscovery(executablePath: "/usr/local/bin/ollama")
+        self.modelDiscovery = OllamaModelDiscovery()
         self.hotkeyValidator = HotkeyValidator()
 
         let storedModel = userDefaults.string(forKey: UserDefaultsKey.model)
