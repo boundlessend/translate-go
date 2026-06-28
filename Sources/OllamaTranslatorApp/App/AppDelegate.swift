@@ -36,7 +36,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         self.ollamaRuntimeManager = OllamaRuntimeManager(
             tagsEndpoint: URL(string: "http://localhost:11434/api/tags")!,
             generateEndpoint: URL(string: "http://localhost:11434/api/generate")!,
-            model: OllamaModelPreset.translateGemma12b.rawValue,
+            model: OllamaDefaults.model,
             diagnosticLogger: diagnosticLogger
         )
         self.notificationPresenter = NotificationPresenter()
@@ -82,9 +82,30 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         return true
     }
 
-    func applicationWillTerminate(_ notification: Notification) {
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         currentTranslationTask?.cancel()
-        ollamaRuntimeManager.stopOnApplicationExit()
+        Task { @MainActor in
+            await stopOllamaRuntimeBounded()
+            NSApp.reply(toApplicationShouldTerminate: true)
+        }
+        return .terminateLater
+    }
+
+    /// останавливает ollama в фоне, не блокируя выход дольше таймаута
+    private func stopOllamaRuntimeBounded() async {
+        let cleanup = Task.detached(priority: .userInitiated) { [ollamaRuntimeManager] in
+            ollamaRuntimeManager.stopOnApplicationExit()
+        }
+        let timeout = Task {
+            try? await Task.sleep(nanoseconds: 3_000_000_000)
+        }
+
+        await withTaskGroup(of: Void.self) { group in
+            group.addTask { await cleanup.value }
+            group.addTask { await timeout.value }
+            await group.next()
+            group.cancelAll()
+        }
     }
 
     private func observeSettings() {

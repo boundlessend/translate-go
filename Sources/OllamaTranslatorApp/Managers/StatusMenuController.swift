@@ -6,6 +6,7 @@ final class StatusMenuController {
     private let menu: NSMenu
     private let settingsItem: NSMenuItem
     private let quitItem: NSMenuItem
+    private let target: MenuActionTarget
 
     init(
         openSettings: @escaping () -> Void, openQA: @escaping () -> Void, quit: @escaping () -> Void,
@@ -20,6 +21,7 @@ final class StatusMenuController {
         let target = MenuActionTarget(openSettings: openSettings, openQA: openQA, quit: quit)
         self.settingsItem = settingsItem
         self.quitItem = quitItem
+        self.target = target
 
         settingsItem.target = target
         qaItem.target = target
@@ -36,9 +38,6 @@ final class StatusMenuController {
         updateLanguage(language)
         statusItem.menu = menu
         statusItem.isVisible = false
-
-        objc_setAssociatedObject(
-            menu, Unmanaged.passUnretained(self).toOpaque(), target, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
     }
 
     func setVisible(_ isVisible: Bool) {

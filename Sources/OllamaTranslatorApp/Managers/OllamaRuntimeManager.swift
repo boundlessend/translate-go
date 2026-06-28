@@ -96,11 +96,12 @@ final class OllamaRuntimeManager {
     }
 
     private func preloadModel() async throws {
-        let requestBody = OllamaPreloadRequest(
+        let requestBody = GenerateRequest(
             model: model,
             prompt: "",
             stream: false,
-            keepAlive: "30m"
+            keepAlive: "30m",
+            options: nil
         )
 
         var request = URLRequest(url: generateEndpoint)

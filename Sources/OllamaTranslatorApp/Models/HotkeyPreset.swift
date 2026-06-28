@@ -12,11 +12,11 @@ struct HotkeyConfiguration: Codable, Equatable {
         KeyCombo(carbonKeyCode: carbonKeyCode, carbonModifiers: carbonModifiers)
     }
 
-    static func controlC() -> HotkeyConfiguration {
+    static func defaultHotkey() -> HotkeyConfiguration {
         HotkeyConfiguration(
             carbonKeyCode: UInt32(kVK_ANSI_C),
-            carbonModifiers: NSEvent.ModifierFlags.control.carbonFlags,
-            title: "⌃C"
+            carbonModifiers: NSEvent.ModifierFlags([.control, .option]).carbonFlags,
+            title: "⌃⌥C"
         )
     }
 

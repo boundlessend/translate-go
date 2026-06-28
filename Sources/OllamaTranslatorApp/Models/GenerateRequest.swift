@@ -5,7 +5,7 @@ struct GenerateRequest: Encodable {
     let prompt: String
     let stream: Bool
     let keepAlive: String
-    let options: GenerateOptions
+    let options: GenerateOptions?
 
     enum CodingKeys: String, CodingKey {
         case model

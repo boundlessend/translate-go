@@ -1,8 +1,9 @@
 import Foundation
 
-/// пишет структурированные события в пользовательский лог приложения
-struct DiagnosticLogger {
+/// пишет структурированные события в пользовательский лог приложения, сериализуя записи
+final class DiagnosticLogger {
     private let logURL: URL
+    private let queue: DispatchQueue
 
     init() {
         let directoryURL = FileManager.default.homeDirectoryForCurrentUser
@@ -11,6 +12,7 @@ struct DiagnosticLogger {
             .appendingPathComponent("translate-go")
 
         self.logURL = directoryURL.appendingPathComponent("translator.log")
+        self.queue = DispatchQueue(label: "dev.boundlessend.translate-go.diagnostic-logger")
 
         do {
             try FileManager.default.createDirectory(
@@ -31,6 +33,16 @@ struct DiagnosticLogger {
             .joined(separator: " ")
         let line = "\(timestamp) event=\(event) \(formattedFields)\n"
 
+        queue.async {
+            self.writeLine(line)
+        }
+    }
+
+    func logURLPath() -> String {
+        logURL.path
+    }
+
+    private func writeLine(_ line: String) {
         guard let data = line.data(using: .utf8) else {
             return
         }
@@ -61,10 +73,6 @@ struct DiagnosticLogger {
         } catch {
             writeFallback(message: "event=log_file_write_failed error=\(escaped(error.localizedDescription))")
         }
-    }
-
-    func logURLPath() -> String {
-        logURL.path
     }
 
     private func escaped(_ value: String) -> String {

@@ -24,7 +24,7 @@
 
 ## Fonctionnalités
 
-- raccourci global pour traduire le texte sélectionné (par défaut `⌃C`)
+- raccourci global pour traduire le texte sélectionné (par défaut `⌃⌥C`)
 - traduction locale avec Ollama
 - démarrage automatique, préchargement du modèle et arrêt du serveur Ollama local
 - réglages du modèle, de la langue cible, de la langue de l'interface, du Dock et de la barre de menus

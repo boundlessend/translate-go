@@ -52,7 +52,7 @@ final class SettingsViewModel: ObservableObject {
         let storedModel = userDefaults.string(forKey: UserDefaultsKey.model)
         let normalizedModel =
             storedModel?.trimmingCharacters(in: .whitespacesAndNewlines)
-            ?? OllamaModelPreset.translateGemma12b.rawValue
+            ?? OllamaDefaults.model
         self.model = normalizedModel
         self.availableModels = []
         userDefaults.set(normalizedModel, forKey: UserDefaultsKey.model)
@@ -64,7 +64,7 @@ final class SettingsViewModel: ObservableObject {
         let storedHotkeyData = userDefaults.data(forKey: UserDefaultsKey.hotkeyConfiguration)
         self.hotkeyConfiguration =
             storedHotkeyData.flatMap(HotkeyConfiguration.decode(data:))
-            ?? HotkeyConfiguration.controlC()
+            ?? HotkeyConfiguration.defaultHotkey()
 
         self.isDockVisible = userDefaults.object(forKey: UserDefaultsKey.isDockVisible) as? Bool ?? true
         self.isMenuBarVisible = userDefaults.object(forKey: UserDefaultsKey.isMenuBarVisible) as? Bool ?? true
@@ -101,7 +101,7 @@ final class SettingsViewModel: ObservableObject {
     }
 
     func resetHotkey() {
-        hotkeyConfiguration = HotkeyConfiguration.controlC()
+        hotkeyConfiguration = HotkeyConfiguration.defaultHotkey()
     }
 }
 
