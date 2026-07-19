@@ -18,12 +18,9 @@ struct SettingsView: View {
         Form {
             Section {
                 Picker(AppText.modelLabel(language), selection: $viewModel.model) {
-                    ForEach(viewModel.availableModels, id: \.self) { model in
+                    ForEach(viewModel.modelOptions, id: \.self) { model in
                         Text(model).tag(model)
                     }
-                }
-                .onChange(of: viewModel.model) { selectedModel in
-                    viewModel.selectModel(selectedModel)
                 }
 
                 HStack {
@@ -45,6 +42,16 @@ struct SettingsView: View {
                         Text(language.title).tag(language)
                     }
                 }
+            }
+
+            Section {
+                TextField(AppText.ollamaServerURLLabel(language), text: $viewModel.ollamaBaseURLText)
+                    .textFieldStyle(.roundedBorder)
+
+                TextField(AppText.ollamaExecutablePathLabel(language), text: $viewModel.ollamaExecutablePathText)
+                    .textFieldStyle(.roundedBorder)
+
+                Toggle(AppText.preloadModelToggle(language), isOn: $viewModel.isModelPreloadEnabled)
             }
 
             Section {

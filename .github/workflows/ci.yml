@@ -13,21 +13,18 @@ concurrency:
 jobs:
   lint:
     name: Lint Swift formatting
-    runs-on: macos-14
+    runs-on: macos-15
 
     steps:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Install swift-format
-        run: brew install swift-format
-
       - name: Lint
-        run: swift-format lint --strict --recursive --configuration .swift-format Sources
+        run: xcrun swift-format lint --strict --recursive --configuration .swift-format Sources Tests
 
   build:
     name: Build macOS app
-    runs-on: macos-14
+    runs-on: macos-15
 
     steps:
       - name: Checkout
@@ -48,6 +45,9 @@ jobs:
 
       - name: Build debug
         run: swift build
+
+      - name: Run tests
+        run: swift test
 
       - name: Build app bundle
         run: ./scripts/build_app.sh

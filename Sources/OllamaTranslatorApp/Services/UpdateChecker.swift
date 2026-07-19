@@ -56,7 +56,7 @@ struct UpdateChecker {
     }
 
     /// убирает префикс тега "v." как это делает release workflow
-    private func normalizeVersion(_ tag: String) -> String {
+    func normalizeVersion(_ tag: String) -> String {
         var version = tag.trimmingCharacters(in: .whitespacesAndNewlines)
         if version.hasPrefix("v") {
             version.removeFirst()
@@ -68,7 +68,7 @@ struct UpdateChecker {
     }
 
     /// сравнивает версии вида "1.5.5" покомпонентно, недостающие компоненты считает нулями
-    private func isVersion(_ lhs: String, olderThan rhs: String) -> Bool {
+    func isVersion(_ lhs: String, olderThan rhs: String) -> Bool {
         let lhsParts = versionComponents(lhs)
         let rhsParts = versionComponents(rhs)
         let count = max(lhsParts.count, rhsParts.count)

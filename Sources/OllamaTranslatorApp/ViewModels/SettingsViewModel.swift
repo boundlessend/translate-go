@@ -40,13 +40,39 @@ final class SettingsViewModel: ObservableObject {
         }
     }
 
+    @Published var ollamaBaseURLText: String {
+        didSet {
+            userDefaults.set(ollamaBaseURLText, forKey: UserDefaultsKey.ollamaBaseURLText)
+        }
+    }
+
+    @Published var ollamaExecutablePathText: String {
+        didSet {
+            userDefaults.set(ollamaExecutablePathText, forKey: UserDefaultsKey.ollamaExecutablePathText)
+        }
+    }
+
+    @Published var isModelPreloadEnabled: Bool {
+        didSet {
+            userDefaults.set(isModelPreloadEnabled, forKey: UserDefaultsKey.isModelPreloadEnabled)
+        }
+    }
+
+    /// текущая модель всегда присутствует в списке, чтобы picker не показывал пустое значение
+    var modelOptions: [String] {
+        availableModels.contains(model) ? availableModels : [model] + availableModels
+    }
+
+    var trimmedOllamaExecutablePath: String? {
+        let path = ollamaExecutablePathText.trimmingCharacters(in: .whitespacesAndNewlines)
+        return path.isEmpty ? nil : path
+    }
+
     private let userDefaults: UserDefaults
-    private let modelDiscovery: OllamaModelDiscovery
     private let hotkeyValidator: HotkeyValidator
 
     init(userDefaults: UserDefaults) {
         self.userDefaults = userDefaults
-        self.modelDiscovery = OllamaModelDiscovery()
         self.hotkeyValidator = HotkeyValidator()
 
         let storedModel = userDefaults.string(forKey: UserDefaultsKey.model)
@@ -68,31 +94,40 @@ final class SettingsViewModel: ObservableObject {
 
         self.isDockVisible = userDefaults.object(forKey: UserDefaultsKey.isDockVisible) as? Bool ?? true
         self.isMenuBarVisible = userDefaults.object(forKey: UserDefaultsKey.isMenuBarVisible) as? Bool ?? true
+
+        let storedBaseURLText = userDefaults.string(forKey: UserDefaultsKey.ollamaBaseURLText)
+        self.ollamaBaseURLText =
+            storedBaseURLText?.trimmingCharacters(in: .whitespacesAndNewlines) ?? OllamaDefaults.baseURLText
+        self.ollamaExecutablePathText = userDefaults.string(forKey: UserDefaultsKey.ollamaExecutablePathText) ?? ""
+        self.isModelPreloadEnabled =
+            userDefaults.object(forKey: UserDefaultsKey.isModelPreloadEnabled) as? Bool ?? true
+    }
+
+    func ollamaBaseURL() throws -> URL {
+        let text = ollamaBaseURLText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let url = URL(string: text),
+            let scheme = url.scheme,
+            ["http", "https"].contains(scheme.lowercased()),
+            url.host != nil
+        else {
+            throw AppError.invalidOllamaBaseURL(text: text)
+        }
+
+        return url
     }
 
     func refreshAvailableModels() async throws {
-        let models = try await Task.detached(priority: .userInitiated) { [modelDiscovery] in
-            try modelDiscovery.fetchModels()
+        let preferredExecutablePath = trimmedOllamaExecutablePath
+        let models = try await Task.detached(priority: .userInitiated) {
+            try OllamaModelDiscovery.fetchModels(preferredExecutablePath: preferredExecutablePath)
         }.value
 
         availableModels = models
 
-        guard models.isEmpty == false else {
-            return
-        }
-
-        guard models.contains(model) else {
+        // автоподбор только пока пользователь не выбрал модель сам: явный выбор не подменяется
+        if model == OllamaDefaults.model, models.isEmpty == false, models.contains(model) == false {
             model = models[0]
-            return
         }
-    }
-
-    func selectModel(_ selectedModel: String) {
-        guard selectedModel.isEmpty == false else {
-            return
-        }
-
-        model = selectedModel
     }
 
     func updateHotkey(_ candidate: HotkeyConfiguration) throws {
@@ -111,4 +146,7 @@ private enum UserDefaultsKey {
     static let hotkeyConfiguration: String = "hotkeyConfiguration"
     static let isDockVisible: String = "isDockVisible"
     static let isMenuBarVisible: String = "showMenuBarItem"
+    static let ollamaBaseURLText: String = "ollamaBaseURLText"
+    static let ollamaExecutablePathText: String = "ollamaExecutablePathText"
+    static let isModelPreloadEnabled: String = "isModelPreloadEnabled"
 }

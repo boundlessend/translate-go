@@ -1,8 +1,9 @@
 import AppKit
+import Carbon
 
 enum KeyboardEventSender {
     static func sendCommandC() throws {
-        let keyCodeForC: CGKeyCode = 8
+        let keyCodeForC = CGKeyCode(kVK_ANSI_C)
         guard let source = CGEventSource(stateID: .hidSystemState) else {
             throw AppError.unexpected(NSError(domain: "KeyboardEventSender", code: 1))
         }

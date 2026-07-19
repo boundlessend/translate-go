@@ -13,15 +13,19 @@
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
     <key>CFBundleVersion</key>
-    <string>1.5.5</string>
+    <string>0.0.0</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.5.5</string>
+    <string>0.0.0</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>LSMinimumSystemVersion</key>
     <string>13.0</string>
-    <key>NSAppleEventsUsageDescription</key>
-    <string>translate&amp;go needs permission to send Command-C to the active app.</string>
+    <key>LSUIElement</key>
+    <true/>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.productivity</string>
+    <key>NSHumanReadableCopyright</key>
+    <string>© boundlessend</string>
     <key>NSAccessibilityUsageDescription</key>
     <string>translate&amp;go needs Accessibility access to copy selected text and write the translation to the clipboard.</string>
 </dict>

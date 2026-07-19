@@ -13,12 +13,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let permissionManager: PermissionManager
     private let diagnosticLogger: DiagnosticLogger
     private let pasteboard: NSPasteboard
-    private lazy var settingsWindowController: SettingsWindowController = {
-        SettingsWindowController(viewModel: settingsViewModel)
-    }()
-    private lazy var qaWindowController: QAWindowController = {
-        QAWindowController(viewModel: settingsViewModel)
-    }()
+    private lazy var settingsWindowController = PanelWindowController(
+        title: { [settingsViewModel] in
+            "translate&go \(AppText.settingsTitle(settingsViewModel.interfaceLanguage))"
+        },
+        content: { [settingsViewModel] in
+            SettingsView(viewModel: settingsViewModel)
+        }
+    )
+    private lazy var qaWindowController = PanelWindowController(
+        title: { "translate&go Q&A" },
+        content: { [settingsViewModel] in
+            QAView(viewModel: settingsViewModel)
+        }
+    )
     private var hotkeyManager: HotkeyManager?
     private var statusMenuController: StatusMenuController?
     private var cancellables: Set<AnyCancellable>
@@ -29,16 +37,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     override init() {
         let diagnosticLogger = DiagnosticLogger()
         self.settingsViewModel = SettingsViewModel(userDefaults: .standard)
-        self.translationService = TranslationService(
-            ollamaEndpoint: URL(string: "http://localhost:11434/api/generate")!
-        )
+        self.translationService = TranslationService()
         self.diagnosticLogger = diagnosticLogger
-        self.ollamaRuntimeManager = OllamaRuntimeManager(
-            tagsEndpoint: URL(string: "http://localhost:11434/api/tags")!,
-            generateEndpoint: URL(string: "http://localhost:11434/api/generate")!,
-            model: OllamaDefaults.model,
-            diagnosticLogger: diagnosticLogger
-        )
+        self.ollamaRuntimeManager = OllamaRuntimeManager(diagnosticLogger: diagnosticLogger)
         self.notificationPresenter = NotificationPresenter()
         self.permissionManager = PermissionManager(notificationPresenter: notificationPresenter)
         self.pasteboard = .general
@@ -84,17 +85,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         currentTranslationTask?.cancel()
+        let preferredExecutablePath = settingsViewModel.trimmedOllamaExecutablePath
+        let model = settingsViewModel.model
         Task { @MainActor in
-            await stopOllamaRuntimeBounded()
+            await stopOllamaRuntimeBounded(preferredExecutablePath: preferredExecutablePath, model: model)
             NSApp.reply(toApplicationShouldTerminate: true)
         }
         return .terminateLater
     }
 
     /// останавливает ollama в фоне, не блокируя выход дольше таймаута
-    private func stopOllamaRuntimeBounded() async {
+    private func stopOllamaRuntimeBounded(preferredExecutablePath: String?, model: String) async {
         let cleanup = Task.detached(priority: .userInitiated) { [ollamaRuntimeManager] in
-            ollamaRuntimeManager.stopOnApplicationExit()
+            await ollamaRuntimeManager.stopOnApplicationExit(
+                preferredExecutablePath: preferredExecutablePath,
+                model: model
+            )
         }
         let timeout = Task {
             try? await Task.sleep(nanoseconds: 3_000_000_000)
@@ -243,13 +249,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func startOllamaRuntime() {
-        Task {
+        Task { @MainActor in
             do {
-                try await ollamaRuntimeManager.startIfNeeded()
+                let baseURL = try settingsViewModel.ollamaBaseURL()
+                try await ollamaRuntimeManager.startIfNeeded(
+                    baseURL: baseURL,
+                    preferredExecutablePath: settingsViewModel.trimmedOllamaExecutablePath,
+                    model: settingsViewModel.model,
+                    shouldPreloadModel: settingsViewModel.isModelPreloadEnabled
+                )
             } catch {
-                await MainActor.run {
-                    showTranslationError(error)
-                }
+                showTranslationError(error)
             }
         }
     }
@@ -302,10 +312,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                     "model": settingsViewModel.model,
                 ]
             )
+            let generateEndpoint = try settingsViewModel.ollamaBaseURL().appendingPathComponent("api/generate")
             let translatedText = try await translationService.translate(
                 text: selectedText,
                 model: settingsViewModel.model,
-                targetLanguage: settingsViewModel.targetLanguageText
+                targetLanguage: settingsViewModel.targetLanguageText,
+                endpoint: generateEndpoint
             )
             try Task.checkCancellation()
             try checkCurrentTranslation(generation: generation)
@@ -388,7 +400,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @MainActor
     private func waitForSelectedText(after pasteboardChangeCount: Int) async throws -> String {
         let attempts: Int = 100
+        let nonTextGraceAttempts: Int = 10
         let delayNanoseconds: UInt64 = 50_000_000
+        var attemptsAfterChange: Int = 0
 
         for _ in 0..<attempts {
             try await Task.sleep(nanoseconds: delayNanoseconds)
@@ -399,6 +413,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
             let text = pasteboard.string(forType: .string)?.trimmingCharacters(in: .whitespacesAndNewlines)
             guard let text else {
+                // буфер уже изменился, но строки нет: короткий грейс на дозапись, затем явная ошибка
+                attemptsAfterChange += 1
+                guard attemptsAfterChange < nonTextGraceAttempts else {
+                    throw AppError.selectedContentNotText
+                }
+
                 continue
             }
 
@@ -432,6 +452,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let message = "\(error.localizedDescription)\n\n\(AppText.logLabel(language)): \(diagnosticLogger.logURLPath())"
         notificationPresenter.show(title: title, message: message)
 
+        // модальный алерт крадёт фокус, поэтому он только для ошибок первичной настройки
+        guard isSetupError(error) else {
+            return
+        }
+
         let alert = NSAlert()
         alert.messageText = title
         alert.informativeText = message
@@ -440,5 +465,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         NSApp.activate(ignoringOtherApps: true)
         alert.runModal()
+    }
+
+    private func isSetupError(_ error: Error) -> Bool {
+        switch error {
+        case AppError.accessibilityPermissionMissing, AppError.ollamaExecutableMissing,
+            AppError.ollamaStartupTimedOut:
+            return true
+        default:
+            return false
+        }
     }
 }

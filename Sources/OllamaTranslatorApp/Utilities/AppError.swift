@@ -6,6 +6,8 @@ enum AppError: LocalizedError {
     case emptyTranslation
     case invalidResponse
     case copySelectionTimedOut
+    case selectedContentNotText
+    case invalidOllamaBaseURL(text: String)
     case pasteboardWriteFailed
     case pasteboardRestoreFailed
     case ollamaExecutableMissing(path: String)
@@ -44,6 +46,10 @@ enum AppError: LocalizedError {
         case .copySelectionTimedOut:
             return
                 "Не удалось получить выделенный текст через Command-C. Проверьте выделение текста и разрешение Accessibility."
+        case .selectedContentNotText:
+            return "Выделение не является текстом. Выделите текст и повторите."
+        case .invalidOllamaBaseURL(let text):
+            return "Адрес сервера Ollama '\(text)' не является корректным http(s) URL. Исправьте его в настройках."
         case .pasteboardWriteFailed:
             return "Не удалось записать перевод в системный буфер обмена."
         case .pasteboardRestoreFailed:
@@ -88,6 +94,10 @@ enum AppError: LocalizedError {
             return "Ollama returned a response without an HTTP status."
         case .copySelectionTimedOut:
             return "Could not read selected text with Command-C. Check the text selection and Accessibility permission."
+        case .selectedContentNotText:
+            return "The selection is not text. Select text and try again."
+        case .invalidOllamaBaseURL(let text):
+            return "The Ollama server address '\(text)' is not a valid http(s) URL. Fix it in Settings."
         case .pasteboardWriteFailed:
             return "Could not write the translation to the clipboard."
         case .pasteboardRestoreFailed:

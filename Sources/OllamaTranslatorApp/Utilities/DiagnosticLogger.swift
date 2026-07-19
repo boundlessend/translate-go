@@ -1,9 +1,12 @@
 import Foundation
 
 /// пишет структурированные события в пользовательский лог приложения, сериализуя записи
-final class DiagnosticLogger {
+/// @unchecked: все поля неизменяемые, запись в файл сериализована через queue
+final class DiagnosticLogger: @unchecked Sendable {
     private let logURL: URL
     private let queue: DispatchQueue
+    private let timestampFormatter: ISO8601DateFormatter
+    private let maxLogSizeBytes: UInt64 = 5 * 1024 * 1024
 
     init() {
         let directoryURL = FileManager.default.homeDirectoryForCurrentUser
@@ -13,6 +16,7 @@ final class DiagnosticLogger {
 
         self.logURL = directoryURL.appendingPathComponent("translator.log")
         self.queue = DispatchQueue(label: "dev.boundlessend.translate-go.diagnostic-logger")
+        self.timestampFormatter = ISO8601DateFormatter()
 
         do {
             try FileManager.default.createDirectory(
@@ -22,10 +26,12 @@ final class DiagnosticLogger {
         } catch {
             writeFallback(message: "event=log_directory_create_failed error=\(escaped(error.localizedDescription))")
         }
+
+        rotateOversizedLog()
     }
 
     func log(event: String, fields: [String: String]) {
-        let timestamp = ISO8601DateFormatter().string(from: Date())
+        let timestamp = timestampFormatter.string(from: Date())
         let formattedFields =
             fields
             .map { key, value in "\(key)=\(escaped(value))" }
@@ -40,6 +46,20 @@ final class DiagnosticLogger {
 
     func logURLPath() -> String {
         logURL.path
+    }
+
+    /// ponytail: вместо ротации файл просто удаляется при старте, история старше одного запуска не нужна
+    private func rotateOversizedLog() {
+        let attributes = try? FileManager.default.attributesOfItem(atPath: logURL.path)
+        guard let size = attributes?[.size] as? UInt64, size > maxLogSizeBytes else {
+            return
+        }
+
+        do {
+            try FileManager.default.removeItem(at: logURL)
+        } catch {
+            writeFallback(message: "event=log_rotation_failed error=\(escaped(error.localizedDescription))")
+        }
     }
 
     private func writeLine(_ line: String) {
@@ -80,7 +100,7 @@ final class DiagnosticLogger {
     }
 
     private func writeFallback(message: String) {
-        let line = "\(ISO8601DateFormatter().string(from: Date())) \(message)\n"
+        let line = "\(timestampFormatter.string(from: Date())) \(message)\n"
         guard let data = line.data(using: .utf8) else {
             return
         }

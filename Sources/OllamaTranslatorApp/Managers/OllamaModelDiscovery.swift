@@ -1,9 +1,10 @@
 import Foundation
 
-final class OllamaModelDiscovery {
-    func fetchModels() throws -> [String] {
-        let listModels = try runOllama(arguments: ["list"])
-        let runningModels = try runOllama(arguments: ["ps"])
+/// перечисляет установленные модели через команды ollama list и ollama ps
+enum OllamaModelDiscovery {
+    static func fetchModels(preferredExecutablePath: String?) throws -> [String] {
+        let listModels = try runOllama(arguments: ["list"], preferredExecutablePath: preferredExecutablePath)
+        let runningModels = try runOllama(arguments: ["ps"], preferredExecutablePath: preferredExecutablePath)
         let models = Set(parseModelNames(output: listModels) + parseModelNames(output: runningModels))
         let sortedModels = models.sorted { left, right in
             left.localizedStandardCompare(right) == .orderedAscending
@@ -12,9 +13,11 @@ final class OllamaModelDiscovery {
         return sortedModels
     }
 
-    private func runOllama(arguments: [String]) throws -> String {
-        guard let executablePath = OllamaExecutable.resolvedPath() else {
-            throw AppError.ollamaExecutableMissing(path: OllamaExecutable.candidatePaths.joined(separator: ", "))
+    private static func runOllama(arguments: [String], preferredExecutablePath: String?) throws -> String {
+        guard let executablePath = OllamaExecutable.resolvedPath(preferredPath: preferredExecutablePath) else {
+            throw AppError.ollamaExecutableMissing(
+                path: OllamaExecutable.missingPathDescription(preferredPath: preferredExecutablePath)
+            )
         }
 
         let process = Process()
@@ -27,10 +30,12 @@ final class OllamaModelDiscovery {
         process.standardError = errorPipe
 
         try process.run()
-        process.waitUntilExit()
 
+        // читать пайпы нужно до waitUntilExit, иначе процесс блокируется при выводе больше буфера пайпа
         let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
         let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
+        process.waitUntilExit()
+
         let output = String(data: outputData + errorData, encoding: .utf8) ?? ""
 
         guard process.terminationStatus == 0 else {
@@ -44,7 +49,7 @@ final class OllamaModelDiscovery {
         return output
     }
 
-    private func parseModelNames(output: String) -> [String] {
+    private static func parseModelNames(output: String) -> [String] {
         output
             .components(separatedBy: .newlines)
             .dropFirst()

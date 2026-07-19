@@ -22,6 +22,11 @@ let package = Package(
             dependencies: ["HotKey"],
             path: "Sources/OllamaTranslatorApp",
             exclude: ["Info.plist", "Resources"]
-        )
+        ),
+        .testTarget(
+            name: "OllamaTranslatorAppTests",
+            dependencies: ["OllamaTranslatorApp"],
+            path: "Tests/OllamaTranslatorAppTests"
+        ),
     ]
 )

@@ -1,18 +1,21 @@
 import AppKit
 import SwiftUI
 
+/// переиспользуемое окно со swiftui-содержимым: создаётся лениво и переживает закрытие
 @MainActor
-final class SettingsWindowController {
-    private let viewModel: SettingsViewModel
+final class PanelWindowController<Content: View> {
+    private let title: () -> String
+    private let content: () -> Content
     private var window: NSWindow?
 
-    init(viewModel: SettingsViewModel) {
-        self.viewModel = viewModel
+    init(title: @escaping () -> String, content: @escaping () -> Content) {
+        self.title = title
+        self.content = content
     }
 
     func showWindow() {
         let window = existingOrNewWindow()
-        window.title = windowTitle()
+        window.title = title()
         window.deminiaturize(nil)
         window.makeKeyAndOrderFront(nil)
         window.orderFrontRegardless()
@@ -24,20 +27,14 @@ final class SettingsWindowController {
             return window
         }
 
-        let rootView = SettingsView(viewModel: viewModel)
-        let hostingController = NSHostingController(rootView: rootView)
+        let hostingController = NSHostingController(rootView: content())
         let window = NSWindow(contentViewController: hostingController)
 
-        window.title = windowTitle()
         window.styleMask = [.titled, .closable, .miniaturizable]
         window.isReleasedWhenClosed = false
         window.center()
 
         self.window = window
         return window
-    }
-
-    private func windowTitle() -> String {
-        "translate&go \(AppText.settingsTitle(viewModel.interfaceLanguage))"
     }
 }

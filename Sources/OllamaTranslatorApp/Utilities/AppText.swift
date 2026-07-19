@@ -324,4 +324,31 @@ enum AppText {
             return "Open release page"
         }
     }
+
+    static func ollamaServerURLLabel(_ language: AppLanguage) -> String {
+        switch language {
+        case .russian:
+            return "Адрес сервера Ollama"
+        case .english:
+            return "Ollama server URL"
+        }
+    }
+
+    static func ollamaExecutablePathLabel(_ language: AppLanguage) -> String {
+        switch language {
+        case .russian:
+            return "Путь к Ollama (пусто = автопоиск)"
+        case .english:
+            return "Ollama binary path (blank = auto)"
+        }
+    }
+
+    static func preloadModelToggle(_ language: AppLanguage) -> String {
+        switch language {
+        case .russian:
+            return "Прогревать модель при запуске"
+        case .english:
+            return "Preload model at launch"
+        }
+    }
 }

@@ -2,51 +2,61 @@ import AppKit
 import Foundation
 
 /// управляет локальным сервером ollama, запущенным этим приложением
-final class OllamaRuntimeManager {
-    private let tagsEndpoint: URL
-    private let generateEndpoint: URL
-    private let model: String
+actor OllamaRuntimeManager {
     private let session: URLSession
     private let encoder: JSONEncoder
     private let diagnosticLogger: DiagnosticLogger
     private var process: Process?
 
-    init(tagsEndpoint: URL, generateEndpoint: URL, model: String, diagnosticLogger: DiagnosticLogger) {
+    init(diagnosticLogger: DiagnosticLogger) {
         let configuration = URLSessionConfiguration.default
         configuration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         configuration.urlCache = nil
         configuration.timeoutIntervalForRequest = 30
-        configuration.timeoutIntervalForResource = 60
+        configuration.timeoutIntervalForResource = 600
 
-        self.tagsEndpoint = tagsEndpoint
-        self.generateEndpoint = generateEndpoint
-        self.model = model
         self.session = URLSession(configuration: configuration)
         self.encoder = JSONEncoder()
         self.diagnosticLogger = diagnosticLogger
     }
 
-    func startIfNeeded() async throws {
+    func startIfNeeded(
+        baseURL: URL,
+        preferredExecutablePath: String?,
+        model: String,
+        shouldPreloadModel: Bool
+    ) async throws {
         diagnosticLogger.log(event: "ollama_start_check_started", fields: ["model": model])
+        let tagsEndpoint = baseURL.appendingPathComponent("api/tags")
 
-        if await isOllamaReady() == false {
+        if await isOllamaReady(tagsEndpoint: tagsEndpoint) == false {
             diagnosticLogger.log(event: "ollama_not_ready", fields: [:])
-            try startOllamaServe()
-            guard try await waitForOllama() else {
+            try startOllamaServe(preferredExecutablePath: preferredExecutablePath)
+            guard try await waitForOllama(tagsEndpoint: tagsEndpoint) else {
                 throw AppError.ollamaStartupTimedOut
             }
         }
 
-        try await preloadModel()
+        guard shouldPreloadModel else {
+            diagnosticLogger.log(event: "ollama_preload_skipped", fields: ["reason": "disabled_in_settings"])
+            return
+        }
+
+        try await preloadModel(generateEndpoint: baseURL.appendingPathComponent("api/generate"), model: model)
         diagnosticLogger.log(event: "ollama_preload_finished", fields: ["model": model])
     }
 
-    func stopOnApplicationExit() {
-        stopModel()
+    func stopOnApplicationExit(preferredExecutablePath: String?, model: String) {
+        guard process != nil else {
+            diagnosticLogger.log(event: "ollama_stop_skipped", fields: ["reason": "server_not_owned"])
+            return
+        }
+
+        stopModel(preferredExecutablePath: preferredExecutablePath, model: model)
         stopOwnedServeProcess()
     }
 
-    private func isOllamaReady() async -> Bool {
+    private func isOllamaReady(tagsEndpoint: URL) async -> Bool {
         var request = URLRequest(url: tagsEndpoint)
         request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         request.timeoutInterval = 2
@@ -63,29 +73,32 @@ final class OllamaRuntimeManager {
         }
     }
 
-    private func startOllamaServe() throws {
-        guard let executablePath = OllamaExecutable.resolvedPath() else {
-            throw AppError.ollamaExecutableMissing(path: OllamaExecutable.candidatePaths.joined(separator: ", "))
+    private func startOllamaServe(preferredExecutablePath: String?) throws {
+        guard let executablePath = OllamaExecutable.resolvedPath(preferredPath: preferredExecutablePath) else {
+            throw AppError.ollamaExecutableMissing(
+                path: OllamaExecutable.missingPathDescription(preferredPath: preferredExecutablePath)
+            )
         }
 
         let executableURL = URL(fileURLWithPath: executablePath)
         let process = Process()
         process.executableURL = executableURL
         process.arguments = ["serve"]
-        process.standardOutput = Pipe()
-        process.standardError = Pipe()
+        // вывод не читается, поэтому пайпы нельзя: заполненный буфер пайпа заблокировал бы сервер
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = FileHandle.nullDevice
 
         try process.run()
         self.process = process
         diagnosticLogger.log(event: "ollama_serve_started", fields: ["path": executableURL.path])
     }
 
-    private func waitForOllama() async throws -> Bool {
+    private func waitForOllama(tagsEndpoint: URL) async throws -> Bool {
         let attempts: Int = 100
         let delayNanoseconds: UInt64 = 100_000_000
 
         for _ in 0..<attempts {
-            if await isOllamaReady() {
+            if await isOllamaReady(tagsEndpoint: tagsEndpoint) {
                 return true
             }
 
@@ -95,7 +108,7 @@ final class OllamaRuntimeManager {
         return false
     }
 
-    private func preloadModel() async throws {
+    private func preloadModel(generateEndpoint: URL, model: String) async throws {
         let requestBody = GenerateRequest(
             model: model,
             prompt: "",
@@ -122,8 +135,8 @@ final class OllamaRuntimeManager {
         }
     }
 
-    private func stopModel() {
-        guard let executablePath = OllamaExecutable.resolvedPath() else {
+    private func stopModel(preferredExecutablePath: String?, model: String) {
+        guard let executablePath = OllamaExecutable.resolvedPath(preferredPath: preferredExecutablePath) else {
             diagnosticLogger.log(event: "ollama_stop_skipped", fields: ["reason": "executable_missing"])
             return
         }
@@ -132,8 +145,8 @@ final class OllamaRuntimeManager {
         let process = Process()
         process.executableURL = executableURL
         process.arguments = ["stop", model]
-        process.standardOutput = Pipe()
-        process.standardError = Pipe()
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = FileHandle.nullDevice
 
         do {
             try process.run()

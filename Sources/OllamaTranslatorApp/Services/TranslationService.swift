@@ -2,19 +2,17 @@ import Foundation
 
 /// переводит текст через локальный ollama и не кеширует ответы модели
 struct TranslationService {
-    private let ollamaEndpoint: URL
     private let session: URLSession
     private let encoder: JSONEncoder
     private let decoder: JSONDecoder
 
-    init(ollamaEndpoint: URL) {
+    init() {
         let configuration = URLSessionConfiguration.default
         configuration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         configuration.urlCache = nil
         configuration.timeoutIntervalForRequest = 600
         configuration.timeoutIntervalForResource = 600
 
-        self.ollamaEndpoint = ollamaEndpoint
         self.session = URLSession(configuration: configuration)
         self.encoder = JSONEncoder()
         self.decoder = JSONDecoder()
@@ -23,26 +21,28 @@ struct TranslationService {
     func translate(
         text: String,
         model: String,
-        targetLanguage: String
+        targetLanguage: String,
+        endpoint: URL
     ) async throws -> String {
-        try await translateWithOllama(text: text, model: model, targetLanguage: targetLanguage)
-    }
-
-    private func translateWithOllama(text: String, model: String, targetLanguage: String) async throws -> String {
         let chunks: [String] = makeTextChunks(text: text, maxLength: 3_000)
         var translatedChunks: [String] = []
 
         for chunk in chunks {
             try Task.checkCancellation()
             let translatedChunk = try await translateOllamaChunk(
-                text: chunk, model: model, targetLanguage: targetLanguage)
+                text: chunk, model: model, targetLanguage: targetLanguage, endpoint: endpoint)
             translatedChunks.append(translatedChunk)
         }
 
         return translatedChunks.joined(separator: "\n\n")
     }
 
-    private func translateOllamaChunk(text: String, model: String, targetLanguage: String) async throws -> String {
+    private func translateOllamaChunk(
+        text: String,
+        model: String,
+        targetLanguage: String,
+        endpoint: URL
+    ) async throws -> String {
         let requestBody = GenerateRequest(
             model: model,
             prompt: makeOllamaPrompt(text: text, targetLanguage: targetLanguage),
@@ -51,7 +51,7 @@ struct TranslationService {
             options: GenerateOptions(numCtx: 8_192)
         )
 
-        var request = URLRequest(url: ollamaEndpoint)
+        var request = URLRequest(url: endpoint)
         request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         request.timeoutInterval = 600
         request.httpMethod = "POST"
@@ -111,29 +111,22 @@ struct TranslationService {
         """
     }
 
-    private func cleanTranslation(_ text: String) -> String {
-        let lines =
-            text
-            .replacingOccurrences(of: "**", with: "")
-            .components(separatedBy: .newlines)
-            .map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { line in
-                line.isEmpty
-                    || line.hasPrefix("*") == false
-                        && line.lowercased().hasPrefix("option") == false
-                        && line.lowercased().hasPrefix("here") == false
-                        && line.lowercased().hasPrefix("the best") == false
-                        && line.lowercased().hasPrefix("explanation") == false
-            }
+    /// убирает только вводную строку-болтовню модели вида "Here is the translation:", не трогая сам перевод
+    func cleanTranslation(_ text: String) -> String {
+        let chatterPrefixes = ["here", "sure", "option", "the best", "explanation", "translation"]
+        var lines = text.trimmingCharacters(in: .whitespacesAndNewlines).components(separatedBy: .newlines)
 
-        guard lines.isEmpty == false else {
-            return text.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let firstLine = lines.first?.trimmingCharacters(in: .whitespaces).lowercased(),
+            firstLine.hasSuffix(":"),
+            chatterPrefixes.contains(where: firstLine.hasPrefix)
+        {
+            lines.removeFirst()
         }
 
         return lines.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    private func makeTextChunks(text: String, maxLength: Int) -> [String] {
+    func makeTextChunks(text: String, maxLength: Int) -> [String] {
         let normalizedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard normalizedText.count > maxLength else {
             return [normalizedText]
@@ -175,7 +168,7 @@ struct TranslationService {
         return chunks
     }
 
-    private func splitLongParagraph(_ paragraph: String, maxLength: Int) -> [String] {
+    func splitLongParagraph(_ paragraph: String, maxLength: Int) -> [String] {
         let sentences: [String] =
             paragraph
             .components(separatedBy: ". ")
