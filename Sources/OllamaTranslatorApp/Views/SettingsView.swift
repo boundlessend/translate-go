@@ -11,6 +11,7 @@ struct SettingsView: View {
     @State private var updateResult: UpdateCheckResult?
 
     private let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
+    private let modelSearchURL = URL(string: "https://ollama.com/search")!
 
     var body: some View {
         let language = viewModel.interfaceLanguage
@@ -24,14 +25,11 @@ struct SettingsView: View {
                 }
 
                 HStack {
-                    Button(AppText.refreshModelsButton(language)) {
+                    busyButton(AppText.refreshModelsButton(language), isBusy: isRefreshingModels) {
                         refreshModels()
                     }
-                    .disabled(isRefreshingModels)
 
-                    Button(AppText.downloadModelButton(language)) {
-                        openModelSearch()
-                    }
+                    openURLButton(AppText.downloadModelButton(language), url: modelSearchURL)
                 }
 
                 TextField(AppText.targetLanguagePlaceholder(language), text: $viewModel.targetLanguageText)
@@ -103,16 +101,8 @@ struct SettingsView: View {
                         .foregroundStyle(.secondary)
                 }
 
-                HStack {
-                    Button(AppText.checkUpdateButton(language)) {
-                        checkForUpdate()
-                    }
-                    .disabled(isCheckingUpdate)
-
-                    if isCheckingUpdate {
-                        ProgressView()
-                            .controlSize(.small)
-                    }
+                busyButton(AppText.checkUpdateButton(language), isBusy: isCheckingUpdate) {
+                    checkForUpdate()
                 }
 
                 if let result = updateResult {
@@ -120,9 +110,7 @@ struct SettingsView: View {
                         VStack(alignment: .leading, spacing: 6) {
                             Text(AppText.updateAvailableMessage(language, version: result.latestVersion))
                                 .foregroundStyle(.secondary)
-                            Button(AppText.openReleaseButton(language)) {
-                                NSWorkspace.shared.open(result.releaseURL)
-                            }
+                            openURLButton(AppText.openReleaseButton(language), url: result.releaseURL)
                         }
                     } else {
                         Text(AppText.upToDateMessage(language))
@@ -148,6 +136,30 @@ struct SettingsView: View {
         }
     }
 
+    private func busyButton(_ title: String, isBusy: Bool, action: @escaping () -> Void) -> some View {
+        HStack {
+            Button(title, action: action)
+                .disabled(isBusy)
+
+            if isBusy {
+                ProgressView()
+                    .controlSize(.small)
+            }
+        }
+    }
+
+    private func openURLButton(_ title: String, url: URL) -> some View {
+        Button(title) {
+            NSWorkspace.shared.open(url)
+        }
+    }
+
+    private func showError(title: String, message: String) {
+        alertTitle = title
+        alertMessage = message
+        isAlertVisible = true
+    }
+
     private func refreshModels() {
         isRefreshingModels = true
 
@@ -155,18 +167,11 @@ struct SettingsView: View {
             do {
                 try await viewModel.refreshAvailableModels()
             } catch {
-                alertTitle = AppText.errorTitle(viewModel.interfaceLanguage)
-                alertMessage = error.localizedDescription
-                isAlertVisible = true
+                showError(title: AppText.errorTitle(viewModel.interfaceLanguage), message: error.localizedDescription)
             }
 
             isRefreshingModels = false
         }
-    }
-
-    private func openModelSearch() {
-        let url = URL(string: "https://ollama.com/search")!
-        NSWorkspace.shared.open(url)
     }
 
     private func checkForUpdate() {
@@ -180,9 +185,7 @@ struct SettingsView: View {
                 let checker = UpdateChecker(releasesEndpoint: endpoint)
                 updateResult = try await checker.checkForUpdate(currentVersion: currentVersion)
             } catch {
-                alertTitle = AppText.errorTitle(viewModel.interfaceLanguage)
-                alertMessage = error.localizedDescription
-                isAlertVisible = true
+                showError(title: AppText.errorTitle(viewModel.interfaceLanguage), message: error.localizedDescription)
             }
 
             isCheckingUpdate = false
@@ -195,9 +198,10 @@ struct SettingsView: View {
             try viewModel.updateHotkey(configuration)
             isRecordingHotkey = false
         } catch {
-            alertTitle = AppText.hotkeyErrorTitle(viewModel.interfaceLanguage)
-            alertMessage = error.localizedDescription
-            isAlertVisible = true
+            showError(
+                title: AppText.hotkeyErrorTitle(viewModel.interfaceLanguage),
+                message: error.localizedDescription
+            )
         }
     }
 
